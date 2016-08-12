@@ -1,5 +1,7 @@
 # NetworkClustering
-Implementing network clustering algorithms
+Implementing network clustering algorithms. 
+
+Out web application is available at [online demo](http://hexagon.esy.es/).
 
 # References
 http://journals.aps.org/pre/abstract/10.1103/PhysRevE.69.066133
