@@ -62,7 +62,7 @@ var node2;
 var node;
 var roots;
 //data
-d3.json("data/dataset1.json", function(error, graph) {
+d3.json("data/dataset3.json", function(error, graph) {
 if (error) throw error;
 //processing
 	var step = between_e(graph);
@@ -292,7 +292,7 @@ function findnei(e,key){
 function findnei2(a,key){
   var nei=[];
   for (var i=0;i<a[0].length;i++){
-    if (a[key][i]==1)
+    if (a[key][i]>=1)
       nei.push(i);
   } 
   return nei;
@@ -310,12 +310,21 @@ function init(m,n){
     return ar;
   }
 
-function a_array(e){
-  var a = init(e.links.length,e.links.length); 
-  for (var i =0; i< e.links.length ; i++){
-    a[e.links[i].source][e.links[i].target]=e.links[i].value;
-    a[e.links[i].target][e.links[i].source]=e.links[i].value;
-  }
+function a_array(ee){
+  var a = init(ee.nodes.length,ee.nodes.length);
+  ee.links.forEach(function(e){
+  	var ii=0;
+  	var jj=0;
+  	ee.nodes.filter(function(n,i){
+	  if (e.source==n.id)
+	    ii=i;
+	  else
+	  	if (e.target==n.id)
+	  		jj=i;
+	});
+	a[ii][jj]=e.value;
+	a[jj][ii]=e.value;
+	});
   return a;
 }
 
@@ -356,7 +365,8 @@ function between_e(graph){
         S.push(i);
         var nei=findnei2(alink,i);
         var l=Q.length;
-        for (var jj in nei){
+        for (var jj = 0;jj<nei.length;jj++)
+        {
           var j=nei[jj];
           if (d[j]==null){
             d[j]=d[i]+1;
@@ -614,6 +624,6 @@ function tree_mapingv2(step,graph){
     return [hi[0],Q];
   }
   else{
-    return [hi,Q];
+    return [{name: "out",children: hi,depth: 0,Q:0}, Q];
   }
 }
