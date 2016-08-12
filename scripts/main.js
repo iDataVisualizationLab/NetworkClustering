@@ -47,6 +47,7 @@ var bar = svg_bar.append("g")
     .attr("y2", function(d) { return d.y2; });
 var tree_dx;
 var node2;
+var node;
 var roots;
 //data
 d3.json("data/dataset1.json", function(error, graph) {
@@ -73,7 +74,7 @@ if (error) throw error;
 	  .attr("stroke", function(d) { return color(1); });
 
 	node2 = svg4.selectAll(".node")
-	      .data(roots.leaves())
+	      .data(roots.leaves(),function(d) { return d.data.name; })
 	      .enter().append("g")
 	      .attr("class", " node--leaf")
 	      .attr("transform", function(d) { return "translate(" + [tree_dx*d.data.depth, d.x] + ")"; });
@@ -122,10 +123,11 @@ if (error) throw error;
     .enter().append("line")
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
-  var node = svg.append("g")
+  node = svg.append("g")
       .attr("class", "nodes")
     .selectAll("circle")
-    .data(graph.nodes)
+    //.data(graph.nodes)
+    .data(graph.nodes,function(d) { return d.id; })
     .enter().append("circle")
       .attr("r", 5)
       .attr("fill", function(d) { return color(d.group); })
@@ -156,7 +158,8 @@ if (error) throw error;
 
     node
         .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+        .attr("cy", function(d) { return d.y; })
+        .attr("fill" , function(d){ return color(d.group)});
   }
   bar.call(d3.drag()
 	.on("start", dragstarted_bar)
@@ -198,10 +201,36 @@ function dragged_bar(d) {
 }
 
 function dragended_bar(d) {
-  var depth = Math.floor(d.x1/tree_dx);
+  var depth = Math.ceil(d.x1/tree_dx);
   var cg = 0;
-  //roots.each(function(d){if d.data.depth>=depth i++;})
-  node2.selectAll("circle").attr("fill",function(d) { return color(depth); });
+  var leave=[];
+  var node_t=[];
+  node_t.push(roots);
+  while (node_t.length!=0){
+  	var node_t_t = node_t.pop();
+  	if (node_t_t.data.depth<depth)
+  	{
+		node_t=node_t_t.children.concat(node_t);
+	}else{
+		leave.push(node_t_t);
+	}
+  }
+  for (var j=0;j<leave.length;j++){
+	node2.data(leave[j].leaves(), function(d) { return d.data.name; })
+	.selectAll("circle")
+	.attr("fill",function(d) { return color(j); });
+	var node_temp=[];
+	leave[j].leaves().forEach(function (e){
+		simulation.nodes().filter(function(n){
+			if (n.id==e.data.name)
+			{
+				n.group=j;
+				node_temp.push(n);
+			}
+		})
+	});
+	node.attr("fill" , function(d){ return color(d.group)});
+	}
 }
 
 
