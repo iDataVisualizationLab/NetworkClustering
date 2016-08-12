@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+.axis {
+  font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.graph {
+  position: absolute;
+}
+.graph {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.node circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.node text {
+  font: 10px sans-serif;
+}
+
+.node--internal circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.node--internal text {
+  text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+}
+.link {
+  fill: none;
+  
+  stroke-opacity: 0.4;
+  stroke-width: 1.5px;
+}
+.bar line{
+  z-index: :5;
+  fill: none;
+  stroke: #1f77b4;
+  stroke-opacity: 0.4;
+  stroke-width: 3px;
+}
+#treemap,#group{display: inline-block; *display: inline; zoom: 1;}
+#treemap {
+  z-index: 0;
+  width: 50%;
+}
+#group {
+  position:absolute;
+  z-index: 1;
+}
+#treemap_graph {
+  z-index: 0;
+}
+#treemap_tree {
+  z-index: 0;
+}
+#treemap_main {
+  position: absolute;
+  z-index: 1;
+}
+#treemap_bar {
+  position:absolute;
+  z-index: 2;
+}
+</style>
+<body>
+<div id="container">
+  <div div id="treemap"  class="treemap">
+    <div div id="treemap_main"  class="treemap_main">
+      <div div id="treemap_graph"  class="treemap_graph">
+      </div>
+      <div div id="treemap_tree"  class="treemap_tree">
+      </div>
+    </div>
+    <div div id="treemap_bar"  class="treemap_bar">
+    </div>
+  </div>
+  <div id="group"  class="group">
+  </div>
+</div>   
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+
+  <script src="scripts/main.js"></script>
+</body>
