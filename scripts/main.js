@@ -2,17 +2,19 @@ var margin = {top: 0, right: 0, bottom: 0, left: 0};
 var width = document.body.clientWidth - margin.left - margin.right;
 var height = 800 - margin.top - margin.bottom;
 
-var wtree = width*0.5;
-var htree = height-width*0.25;
-var wtree_g = width*0.5;
-var htree_g = width*0.25;
+var wtree = width*0.25;
+var htree = height-width*0.125;
+var wtree_g = width*0.25;
+var htree_g = width*0.125;
+var wgroup = width-wtree;
+var hgroup = height;
 var tree_zoom=1;
 var tree_margin = {top: 0, right: 0, bottom: 5, left: 5};
 var bar_pos = [{x1:margin.right, y1:height+margin.top,x2:margin.right, y2:margin.bottom}];
 var svg = d3.select("#group").append("svg")
    // .style("background", "#eed")
-    .attr("width", width*0.5)
-    .attr("height", height);
+    .attr("width", wgroup)
+    .attr("height", hgroup);
 var svg_graph = d3.select("#treemap_graph").append("svg")
    // .style("background", "#eed")
     .attr("width", wtree_g)
@@ -32,7 +34,7 @@ var color = d3.scaleOrdinal(d3.schemeCategory20);
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
     .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 4, height / 4));
+    .force("center", d3.forceCenter((width-wtree)/2, height/2));
 var tree = d3.cluster()
     .size([htree, wtree]);
     //.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2); });
