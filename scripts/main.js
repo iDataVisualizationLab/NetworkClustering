@@ -49,7 +49,7 @@ var tree_dx;
 var node2;
 var roots;
 //data
-d3.json("dataset1.json", function(error, graph) {
+d3.json("data/dataset1.json", function(error, graph) {
 if (error) throw error;
 //processing
 	var step = between_e(graph);
@@ -200,7 +200,7 @@ function dragged_bar(d) {
 function dragended_bar(d) {
   var depth = Math.floor(d.x1/tree_dx);
   var cg = 0;
-  roots.each(function(d){if d.data.depth>=depth i++;})
+  //roots.each(function(d){if d.data.depth>=depth i++;})
   node2.selectAll("circle").attr("fill",function(d) { return color(depth); });
 }
 
