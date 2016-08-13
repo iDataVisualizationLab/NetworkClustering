@@ -17,18 +17,20 @@ var htree = htree_b-mtree.top-mtree.bottom;
 var wgroup = width-wtree-mtree.left-mtree.right;
 var hgroup = height;
 var bar_pos = [{x1:0, y1:height,x2:0, y2:0}];
+d3.select("#container").append("div").attr("id","group").attr("class","group").style("left",(margin.right+wtree_b)+"px");
 var svg = d3.select("#group").append("svg")
-   // .style("background", "#eed")
     .attr("width", wgroup)
     .attr("height", hgroup);
 var svg_graph = d3.select("#treemap_graph").append("svg")
    // .style("background", "#eed")
+
     .attr("width", wtree_b_g)
     .attr("height", htree_b_g)
     .attr("transform", "translate(" + [mtree_g.right, mtree_g.top] + ")");
+d3.select("#treemap_main").append("div").attr("id","treemap_tree").attr("class","treemap_tree").style("top",(margin.top+htree_b_g)+"px");
 var svg4 = d3.select("#treemap_tree")
 	.append("svg")
-   // .style("background", "#eed")
+    .style("position", "absolute")
     .attr("width", wtree_b)
     .attr("height", htree_b)
     .attr("transform", "translate(" + [mtree.right, mtree.top] + ")");
@@ -73,7 +75,11 @@ var node2;
 var node;
 var roots;
 var tree_deep_cv;
-//data
+
+<<<<<<< HEAD
+
+=======
+>>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550
 d3.json("data/imdb.json", function(error, graph) {
 if (error) throw error;
 //processing
@@ -114,6 +120,10 @@ if (error) throw error;
 	      .style("text-anchor", "end")
 	      .attr("transform", function(d) { return "rotate(" + (0) + ")"; })
 	      .text(function(d) { return d.data.name; });
+	var clusterbox = d3.select("#treemap_tree").append("rect")
+	      .attr("class","clusterbox")
+	      .style("display","none");
+	clusterbox.append("text");
   //-------------graph
   	var domain = {x:{min:0,max:0},y:{min:0,max:0}}; 
   	domain.y.min = d3.min(tree_hi[1]);
@@ -131,14 +141,7 @@ if (error) throw error;
 	  .call(d3.axisBottom(x_range));
 	svg_graph.append("g")
 	  .attr("class", "axis axis--y")
-      .call(d3.axisLeft(y_range))
-	.append("text")
-      .attr("class", "axis-title")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-	  .text("modularity");
+      .call(d3.axisLeft(y_range));
 
 	svg_graph.append("path")
       .attr("class", "graph")
@@ -163,11 +166,6 @@ if (error) throw error;
       .attr("stroke-width", "1.5px")
       .attr("stroke-dasharray", "3 3");
 
-    //init bar
-	bar_l2.attr("transform", function(d){
-        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
-	bar_l1.attr("transform", function(d){
-        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
   	/*svg_bar.append("rect")
       .attr("class", "overlay")
       .attr("width", wtree_g)
@@ -234,14 +232,12 @@ if (error) throw error;
         .attr("cy", function(d) { return d.y; })
         .attr("fill" , function(d){ return color(d.group)});
   }
-  bar_l2.call(d3.drag()
-	.on("start", dragstarted_bar)
-	.on("drag", dragged_bar)
-	.on("end", dragended_bar))
-    .on("mousemove",dragstarted_bar)
-    .on("mouseout",mouseout);
-
-  var x0 = x_range(max_Q.pos);
+  //---------------------init bar
+	bar_l2.attr("transform", function(d){
+        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
+	bar_l1.attr("transform", function(d){
+        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
+	var x0 = x_range(max_Q.pos);
 		        y0 = y_range(max_Q.val);
 		    focus.attr("transform", "translate(" + x0 + "," + y0 + ")");
 		    focus.select("text").text(y0);
@@ -250,24 +246,36 @@ if (error) throw error;
 		    .attr("y1",0)
 		    .attr("x2",-x0)
 		    .attr("y2",0);    
-   bar_l2.attr("x1",function(d){d.x1 = x0; return bar_pos.x1});
+   	bar_l2.attr("x1",function(d){d.x1 = x0; return bar_pos.x1});
+  var numofg=1;
+   	update_group(max_Q.pos);
+  //---------------
+  bar_l2.call(d3.drag()
+	.on("start", dragstarted_bar)
+	.on("drag", dragged_bar)
+	.on("end", dragended_bar))
+    .on("mousemove",dragstarted_bar)
+    .on("mouseout",mouseout);
+
   function mouseout(d){
   	bar_l2.style("opacity", "0");
-			focus.style('display', "none");
+	focus.style('display', "none");
+	clusterbox.style("display","none");
   }
   function dragstarted_bar(d) {
   	bar_l2.style("opacity", "0.5"); 
-    		focus.style('display', null);
+	focus.style('display', null);
+	clusterbox.style("display",null);
 	var x0 = Math.round(x_range.invert(d.x1));
-	        d = y_range(tree_hi[1][x0]);
-	    focus.attr("transform", "translate(" + x_range(x0)+ "," + (d ) + ")");
-	    focus.select("text").text(tree_hi[1][x0]);
-	    focus.select("line.x")
-	    .attr("x1",0)
-	    .attr("y1",0)
-	    .attr("x2",x_range(x0))
-	    .attr("y2",0);
-	}
+        d = y_range(tree_hi[1][x0]);
+    focus.attr("transform", "translate(" + x_range(x0)+ "," + (d ) + ")");
+    focus.select("text").text(tree_hi[1][x0]);
+    focus.select("line.x")
+    .attr("x1",0)
+    .attr("y1",0)
+    .attr("x2",x_range(x0))
+    .attr("y2",0);
+  }
 
 	function dragged_bar(d) {
 		bar_l2.on("mouseout",null)
@@ -303,11 +311,15 @@ if (error) throw error;
 		bar_l2.style("opacity", "0")
 		.on("mouseout",mouseout);;
 			focus.style('display', "none");
-	  var depth = Math.ceil(d.x1/tree_dx);
-	  if (depth<0)
-	  	depth=0;
-	  else{
-		  var cg = 0;
+		var depth = Math.ceil(d.x1/tree_dx);
+		if (depth<0)
+			depth=0;
+		else
+		  update_group(depth);
+	}
+
+	function update_group(depth){
+		var cg = 0;
 		  var leave=[];
 		  var node_t=[];
 		  node_t.push(roots);
@@ -323,6 +335,8 @@ if (error) throw error;
 				leave.push(node_t_t);
 			}
 		  }
+		  numofg=leave.length;
+		  clusterbox.select("text").text("# of cluster : "+leave.length+" | Q : "+Math.round(tree_hi[1][depth]*1000)/1000);
 		  for (var j=0;j<leave.length;j++){
 			node2.data(leave[j].leaves(), function(d) { return d.data.name; })
 			.selectAll("circle")
@@ -339,7 +353,6 @@ if (error) throw error;
 			});
 			node.attr("fill" , function(d){ return color(d.group)});
 			}
-		}
 	}
 });
 
