@@ -73,7 +73,7 @@ var node;
 var roots;
 var tree_deep_cv;
 //data
-d3.json("data/dataset3.json", function(error, graph) {
+d3.json("data/imdb.json", function(error, graph) {
 if (error) throw error;
 //processing
 	var step = between_e(graph);
