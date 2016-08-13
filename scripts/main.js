@@ -73,7 +73,10 @@ var node;
 var roots;
 var tree_deep_cv;
 //data
+<<<<<<< HEAD
 
+=======
+>>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550
 d3.json("data/imdb.json", function(error, graph) {
 if (error) throw error;
 //processing
