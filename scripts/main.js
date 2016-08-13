@@ -125,8 +125,9 @@ if (error) throw error;
 
 	var y_range = d3.scaleLinear().domain([domain.y.min, domain.y.max]).range([htree_g, 0]);
 	var x_range = d3.scaleLinear().domain([0, tree_hi[1].length-1]).range([wtree_g, 0]);
+	var max_Q = {pos:0,val:tree_hi[1][0]};
 	var line_g = d3.line()
-	    .x(function(d,i) { return x_range(i); })
+	    .x(function(d,i) { if(d>max_Q.val){max_Q.val = d; max_Q.pos = i} return x_range(i); })
 	    .y(function(d) { return y_range(d); });
 	svg_graph.append("g")
 	  .attr("class", "axis axis--x")
@@ -165,6 +166,12 @@ if (error) throw error;
       .attr("stroke", "black")
       .attr("stroke-width", "1.5px")
       .attr("stroke-dasharray", "3 3");
+
+    //init bar
+	bar_l2.attr("transform", function(d){
+        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
+	bar_l1.attr("transform", function(d){
+        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
   	/*svg_bar.append("rect")
       .attr("class", "overlay")
       .attr("width", wtree_g)
@@ -237,6 +244,17 @@ if (error) throw error;
 	.on("end", dragended_bar))
     .on("mousemove",dragstarted_bar)
     .on("mouseout",mouseout);
+
+  var x0 = x_range(max_Q.pos);
+		        y0 = y_range(max_Q.val);
+		    focus.attr("transform", "translate(" + x0 + "," + y0 + ")");
+		    focus.select("text").text(y0);
+		    focus.select("line.x")
+		    .attr("x1",0)
+		    .attr("y1",0)
+		    .attr("x2",-x0)
+		    .attr("y2",0);    
+   bar_l2.attr("x1",function(d){d.x1 = x0; return bar_pos.x1});
   function mouseout(d){
   	bar_l2.style("opacity", "0");
 			focus.style('display', "none");
@@ -282,7 +300,7 @@ if (error) throw error;
 		    .attr("y1",0)
 		    .attr("x2",-x_range(x0))
 		    .attr("y2",0);
-	  d.x2 = d.x1;   
+	  //d.x2 = d.x1;   
 	}
 
 	function dragended_bar(d) {
