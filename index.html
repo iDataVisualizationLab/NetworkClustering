@@ -68,20 +68,49 @@
   fill: none;
   stroke: steelblue;
 }
-#treemap,#group{display: inline-block; *display: inline; zoom: 1;}
+.boundary {
+  position: absolute;
+  fill: none;
+  stroke: #aaf;
+  stroke-opacity: 0.5;
+  stroke-width: 5px; 
+  z-index: 0;
+}
+.clusterbox {
+  position: absolute;
+  background: #000;
+  shape-rendering: crispEdges;
+  width: 150px;
+  height: 25px;
+  z-index: 5;
+  border-radius: 3px; 
+  -moz-border-radius: 3px; 
+  -webkit-border-radius: 3px;
+}
+.clusterbox text {
+  font: 10px sans-serif;
+  color: #FFF;
+  padding: 5px 8px 4px 8px; 
+  text-align: center;
+  z-index: 3;
+}
 #treemap {
+  position:absolute;
   z-index: 0;
   width: 25%;
 }
 #group {
   position:absolute;
-  z-index: 1;
+  width: 75%;
+  z-index: 0;
 }
 #treemap_graph {
-  z-index: 0;
+  position: absolute;
+  z-index: 1;
 }
 #treemap_tree {
-  z-index: 0;
+  position: absolute;
+  z-index: 2;
 }
 #treemap_main {
   position: absolute;
@@ -91,21 +120,24 @@
   position:absolute;
   z-index: 2;
 }
+#container {
+  position:absolute;
+  width: 100%;
+  z-index: 0;
+}
 </style>
 <body>
-<div id="container">
+<div id="container" class = "container">
   <div div id="treemap"  class="treemap">
     <div div id="treemap_main"  class="treemap_main">
       <div div id="treemap_graph"  class="treemap_graph">
       </div>
-      <div div id="treemap_tree"  class="treemap_tree">
-      </div>
+
     </div>
     <div div id="treemap_bar"  class="treemap_bar">
     </div>
   </div>
-  <div id="group"  class="group">
-  </div>
+
 </div>   
   <script src="https://d3js.org/d3.v4.min.js"></script>
 
