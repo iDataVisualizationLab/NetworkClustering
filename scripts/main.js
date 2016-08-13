@@ -59,8 +59,7 @@ var bar_l1 = bar
     .attr("y1", function(d) { return d.y1; })
     .attr("x2", function(d) { return d.x2; })
     .attr("y2", function(d) { return d.y2; });
-var bar_l2 = bar
-    .append("line")
+var bar_l2 = bar.append("line")
     .classed('a',true)
     .data(bar_pos)
     .style("opacity",  "0")
@@ -172,7 +171,7 @@ if (error) throw error;
       .on("mouseout", function(d){focus.style('display', 'none')})
       .on("mousemove", mousemove);
     function mousemove() {
-	    var x0 = Math.floor(x_range.invert(d3.mouse(this)[0]-mtree_g.right-margin.right));
+	    var x0 = Math.round(x_range.invert(d3.mouse(this)[0]-mtree_g.left)+mtree_g.right);
 	        d = y_range(tree_hi[1][x0]);
 	    focus.attr("transform", "translate(" + x0 + "," + d + htree_g + ")");
 	    focus.select("text").text(tree_hi[1][x0]);
@@ -232,7 +231,9 @@ if (error) throw error;
   bar_l2.call(d3.drag()
 	.on("start", dragstarted_bar)
 	.on("drag", dragged_bar)
-	.on("end", dragended_bar));
+	.on("end", dragended_bar))
+    .on("mouseover", function(d){ bar_l2.style("opacity", "0.5")})
+	.on("mouseout", function(d){bar_l2.style("opacity", "0")});
 });
 
 function dragstarted(d) {
@@ -261,14 +262,14 @@ function dragged_bar(d) {
   else{
   	if (d.x1>= wtree)
   		d.x1 = wtree;
-
   	
   	else
-
+  	{
   		bar_l2.attr("transform", function(d){
                 return "translate(" + [ d.x1,0 ] + ")"});
   		bar_l1.attr("transform", function(d){
                 return "translate(" + [ d.x1,0 ] + ")"});
+  	}
   }
   d.x2 = d.x1;   
 }
