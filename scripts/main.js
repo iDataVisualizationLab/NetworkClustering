@@ -16,7 +16,7 @@ var htree = htree_b-mtree.top-mtree.bottom;
 
 var wgroup = width-wtree-mtree.left-mtree.right;
 var hgroup = height;
-var bar_pos = [{x1:margin.right, y1:height+margin.top,x2:margin.right, y2:margin.bottom}];
+var bar_pos = [{x1:0, y1:height,x2:0, y2:0}];
 var svg = d3.select("#group").append("svg")
    // .style("background", "#eed")
     .attr("width", wgroup)
@@ -48,16 +48,26 @@ var tree = d3.tree()
     //.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2); });
 var bar = svg_bar.append("g")
       .attr("class", "bar")
-    .selectAll("line")
+      .attr("transform", "translate(" + [mtree.right, mtree_g.top] + ")");
+var bar_l1 = bar
+    .append("line")
+    .classed('b',true)
     .data(bar_pos)
-    .enter().append("line")
      .style("stroke-dasharray",  "4, 2")
      .style("stroke-width", "3px")
     .attr("x1", function(d) { return d.x1; })
     .attr("y1", function(d) { return d.y1; })
     .attr("x2", function(d) { return d.x2; })
-    .attr("y2", function(d) { return d.y2; })
-    .attr("transform", "translate(" + [mtree.right, mtree_g.top] + ")");
+    .attr("y2", function(d) { return d.y2; });
+var bar_l2 = bar
+    .append("line")
+    .classed('a',true)
+    .data(bar_pos)
+    .style("opacity",  "0")
+    .attr("x1", function(d) { return d.x1; })
+    .attr("y1", function(d) { return d.y1; })
+    .attr("x2", function(d) { return d.x2; })
+    .attr("y2", function(d) { return d.y2; });
 var tree_dx;
 var node2;
 var node;
@@ -219,7 +229,7 @@ if (error) throw error;
         .attr("cy", function(d) { return d.y; })
         .attr("fill" , function(d){ return color(d.group)});
   }
-  bar.call(d3.drag()
+  bar_l2.call(d3.drag()
 	.on("start", dragstarted_bar)
 	.on("drag", dragged_bar)
 	.on("end", dragended_bar));
@@ -251,9 +261,14 @@ function dragged_bar(d) {
   else{
   	if (d.x1>= wtree)
   		d.x1 = wtree;
+
+  	
   	else
-  		d3.select(this).attr("transform", function(d){
-                return "translate(" + [ mtree.right+d.x1,mtree_g.top ] + ")"});
+
+  		bar_l2.attr("transform", function(d){
+                return "translate(" + [ d.x1,0 ] + ")"});
+  		bar_l1.attr("transform", function(d){
+                return "translate(" + [ d.x1,0 ] + ")"});
   }
   d.x2 = d.x1;   
 }
