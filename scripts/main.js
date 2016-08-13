@@ -73,9 +73,7 @@ var node;
 var roots;
 var tree_deep_cv;
 //data
-
-//d3.json("data/dataset3.json", function(error, graph) {
-d3.json("data/imdb.json", function(error, graph) {
+d3.json("data/dataset3.json", function(error, graph) {
 if (error) throw error;
 //processing
 	var step = between_e(graph);
@@ -173,9 +171,9 @@ if (error) throw error;
       .on("mouseout", function(d){focus.style('display', 'none')})
       .on("mousemove", mousemove);
     function mousemove() {
-	    var x0 = Math.round(x_range.invert(d3.mouse(this)[0]-mtree_g.left)+mtree_g.right);
+	    var x0 = Math.round(x_range.invert(d3.mouse(this)[0]-mtree_g.left));
 	        d = y_range(tree_hi[1][x0]);
-	    focus.attr("transform", "translate(" + x0 + "," + d + htree_g + ")");
+	    focus.attr("transform", "translate(" + x0 +mtree_g.right+ "," + d + htree_g + ")");
 	    focus.select("text").text(tree_hi[1][x0]);
 	    focus.select("line.y")
 	    .attr("x1",0)
@@ -748,6 +746,10 @@ function tree_mapingv3(step,graph){
 	}else{
 	  if (g1==-1)
 	  {
+	 	if(li[0]==88,li[1]==60){
+
+	 		var aaaaaaa=0;
+	 	}
 	  	lv++;
 	  	//Q
 	    Q_t += delta_Q(li[0],li[1],m,A,a_e);
@@ -764,16 +766,16 @@ function tree_mapingv3(step,graph){
   }
   else{
   	var hi_t=[];
+  	hi_t.push(hi[0])
+  	var iii=1;
   	while (grouping.length != 1){
 	  	Q_t += delta_Q(grouping[0][0],grouping[1][0],m,A,a_e);
 	  	grouping.splice(0,1,grouping[0].concat(grouping[1]));
 	    grouping.splice(1,1);
-	    hi_t.push(hi[0]);
-	    hi_t.push(hi[1]);
+	    hi_t.push(hi[iii]);
+	    iii++;
 	}
-	hi[g1]={name: "join all",children: hi_t,depth: lv+1, Q: Q_t};
-	    hi.splice(g2,1);
 	Q.push(Q_t);
-    return [hi[0],Q];;
+    return [{name: "join all",children: hi_t,depth: lv+1, Q: Q_t},Q];;
   }
 }
