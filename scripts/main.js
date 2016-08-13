@@ -51,7 +51,8 @@ var bar = svg_bar.append("g")
     .selectAll("line")
     .data(bar_pos)
     .enter().append("line")
-     .style("stroke-dasharray",  "1, 2")
+     .style("stroke-dasharray",  "4, 2")
+     .style("stroke-width", "3px")
     .attr("x1", function(d) { return d.x1; })
     .attr("y1", function(d) { return d.y1; })
     .attr("x2", function(d) { return d.x2; })
@@ -61,6 +62,7 @@ var tree_dx;
 var node2;
 var node;
 var roots;
+var tree_deep_cv;
 //data
 d3.json("data/dataset3.json", function(error, graph) {
 if (error) throw error;
@@ -68,8 +70,10 @@ if (error) throw error;
 	var step = between_e(graph);
 	var max_lv=step.length+1;
 // tree
-	var tree_hi = tree_mapingv2(step,graph);
-	tree_dx = wtree/(max_lv-1);
+	var tree_hi = tree_mapingv3(step,graph);
+	var tree_deep = d3.scaleLinear().domain([tree_hi[0].depth,0]).range([0,wtree]); 
+	tree_deep_cv = d3.scaleLinear().domain([tree_hi[0].depth,0]).range([0,tree_hi[1].length]); 
+	tree_dx = wtree/tree_hi[1].length;
 //end
 	roots = d3.hierarchy(tree_hi[0]);
 	tree(roots);
@@ -78,10 +82,10 @@ if (error) throw error;
 	  .enter().append("path")
 	  .attr("class", "link")
 	  .attr("d", function(d) {
-	    return "M" + [tree_dx*d.data.depth, d.x]
-	        + "C" + [tree_dx*(d.parent.data.depth+d.data.depth)/2, d.x]
-	        + " " + [tree_dx*d.parent.data.depth, (d.x+d.parent.x)/2]
-	        + " " + [tree_dx*d.parent.data.depth, d.parent.x];
+	    return "M" + [tree_deep(d.data.depth), d.x]
+	        + "C" + [(tree_deep(d.parent.data.depth)+tree_deep(d.data.depth))/2, d.x]
+	        + " " + [tree_deep(d.parent.data.depth), (d.x+d.parent.x)/2]
+	        + " " + [tree_deep(d.parent.data.depth), d.parent.x];
 	  })
 	  .attr("stroke", function(d) { return color(1); });
 
@@ -89,10 +93,10 @@ if (error) throw error;
 	      .data(roots.leaves(),function(d) { return d.data.name; })
 	      .enter().append("g")
 	      .attr("class", " node--leaf")
-	      .attr("transform", function(d) { return "translate(" + [d.data.depth*tree_dx, d.x] + ")"; });
+	      .attr("transform", function(d) { return "translate(" + [tree_deep(d.data.depth), d.x] + ")"; });
 	node2.append("circle")
 	      .attr("r", 5)
-	      .attr("fill", function(d) { return color(d.parent==null? 0:(d.parent.x+d.parent.y)/30); });
+	      .attr("fill", function(d) { return color(1) });
 
 	node2.append("text")
 	      .attr("dy", ".31em")
@@ -114,7 +118,6 @@ if (error) throw error;
 	  .attr("class", "axis axis--x")
 	  .attr("transform", "translate(0," + htree_g + ")")
 	  .call(d3.axisBottom(x_range));
-
 	svg_graph.append("g")
 	  .attr("class", "axis axis--y")
       .call(d3.axisLeft(y_range))
@@ -130,6 +133,45 @@ if (error) throw error;
       .attr("class", "graph")
       .data([1])
   		.attr("d", line_g(tree_hi[1]));
+
+  	var focus = svg_graph.append("g")
+      .attr("class", "focus")
+      .style("display", "none");
+
+	focus.append("circle")
+	  .attr("r", 4.5);
+
+	focus.append("text")
+	  .attr("x", 9)
+	  .attr("dy", ".35em");
+
+	focus.append("line")
+      .classed("y", true)
+    d3.selectAll(".focus line")
+    .attr({
+        fill: "none",
+        "stroke": "black",
+        "stroke-width": "1.5px",
+        "stroke-dasharray": "3 3"});
+  	svg_bar.append("rect")
+      .attr("class", "overlay")
+      .attr("width", wtree_g)
+      .attr("height", htree_g)
+      .attr("transform", "translate(" + [mtree_g.right, mtree_g.top] + ")")
+      .on("mouseover", function(d){ focus.style('display', null)})
+      .on("mouseout", function(d){focus.style('display', 'none')})
+      .on("mousemove", mousemove);
+    function mousemove() {
+	    var x0 = Math.floor(x_range.invert(d3.mouse(this)[0]-mtree_g.right-margin.right));
+	        d = y_range(tree_hi[1][x0]);
+	    focus.attr("transform", "translate(" + x0 + "," + d + htree_g + ")");
+	    focus.select("text").text(tree_hi[1][x0]);
+	    focus.select("line.y")
+	    .attr("x1",0)
+	    .attr("y1",0)
+	    .attr("x2",0)
+	    .attr("y2",d);
+  	}
 
   //---------------node   
   var link = svg.append("g")
@@ -227,7 +269,7 @@ function dragended_bar(d) {
 	  node_t.push(roots);
 	  while (node_t.length!=0){
 	  	var node_t_t = node_t.pop();
-	  	if (node_t_t.data.depth<depth)
+	  	if (tree_deep_cv(node_t_t.data.depth)<depth)
 	  	{
 	  		if (node_t_t.children!=null)
 				node_t = node_t_t.children.concat(node_t);
@@ -625,5 +667,95 @@ function tree_mapingv2(step,graph){
   }
   else{
     return [{name: "out",children: hi,depth: 0,Q:0}, Q];
+  }
+}
+
+function tree_mapingv3(step,graph){
+  var grouping = [];	
+  var ed = step.pop();
+  var lv = 1;
+  var m = graph.links.length;
+  var A = a_array(graph);
+  var a_e = [];
+  var Q = [];
+  var Q_t = Q_init(A,m,a_e);
+  Q.push(Q_t);
+  grouping.push([graph.nodes[ed[0]].id,graph.nodes[ed[1]].id]);
+  // join 2 nodes together
+  Q_t +=  delta_Q(ed[0],ed[1],m,A,a_e);
+  //----
+  Q.push(Q_t);
+  var hi=[{name: [ed[0],ed[1]],children: [{name: graph.nodes[ed[0]].id, depth: 0},{name: graph.nodes[ed[1]].id, depth: 0}], depth: lv, Q: Q_t}];
+  while (step.length!=0){
+    var li=step.pop();
+    // 4 main case
+	for (var i=0;i<grouping.length;i++){
+    	var g=finditem(grouping,li,graph);}
+
+	var g1=g[0];
+	var g2=g[1];
+	if (g1!=g2){
+		lv++;
+	  if (g1!=-1&&g2!=-1){
+	    // 2 groups -> new group
+	    //Q
+	    Q_t += delta_Q(grouping[g1][0],grouping[g2][0],m,A,a_e);
+	    Q.push(Q_t);
+	    //move
+	    grouping.splice(g1,1,grouping[g1].concat(grouping[g2]));
+	    grouping.splice(g2,1);
+	    var hi_t=[];
+	    hi_t.push(hi[g1]);
+	    hi_t.push(hi[g2]);
+	    hi[g1]={name: li,children: hi_t,depth: lv, Q: Q_t};
+	    hi.splice(g2,1);
+	    //document.write("case 1 "+g1+" "+g2+"   "+JSON.stringify(hi)+"</br>");
+	  }else{
+	    // 1 element + 1 group -> new group
+	    var li_t= li;
+	    if (g2==-1){// li[1] is new element
+	      li_t[0]=li_t[1];
+	    }else{
+	      g1=g2;
+	    }
+	    //Q
+	    Q_t += delta_Q(grouping[g1][0],li[0],m,A,a_e);
+	    Q.push(Q_t);
+	    //move
+	    grouping[g1].push(li[0]);
+	    hi[g1]={name: li,children: [hi[g1]], depth: lv, Q:Q_t};
+	    hi[g1].children.push({name: graph.nodes[li_t[0]].id, depth: 0});
+	    //document.write("case 2 "+JSON.stringify(hi)+"</br>");
+	  }
+	}else{
+	  if (g1==-1)
+	  {
+	  	lv++;
+	  	//Q
+	    Q_t += delta_Q(li[0],li[1],m,A,a_e);
+	    Q.push(Q_t);
+	    //move
+	    grouping.push(li);
+	    hi.push({name: li,children: [{name: graph.nodes[li[0]].id, depth: 0},{name: graph.nodes[li[1]].id, depth: 0}], depth: lv, Q: Q_t});
+	    //document.write("case 3 "+JSON.stringify(hi)+"</br>");
+	  }
+	}
+  }
+  if (hi.length==1){
+    return [hi[0],Q];
+  }
+  else{
+  	var hi_t=[];
+  	while (grouping.length != 1){
+	  	Q_t += delta_Q(grouping[0][0],grouping[1][0],m,A,a_e);
+	  	grouping.splice(0,1,grouping[0].concat(grouping[1]));
+	    grouping.splice(1,1);
+	    hi_t.push(hi[0]);
+	    hi_t.push(hi[1]);
+	}
+	hi[g1]={name: "join all",children: hi_t,depth: lv+1, Q: Q_t};
+	    hi.splice(g2,1);
+	Q.push(Q_t);
+    return [hi[0],Q];;
   }
 }
