@@ -769,17 +769,15 @@ function tree_mapingv3(step,graph){
     return [hi[0],Q];
   }
   else{
-  	var hi_t=[];
-  	hi_t.push(hi[0])
-  	var iii=1;
+  	hi[0]={name: "join all",children: [hi[0]],depth: lv+1, Q: Q_t};
   	while (grouping.length != 1){
 	  	Q_t += delta_Q(grouping[0][0],grouping[1][0],m,A,a_e);
 	  	grouping.splice(0,1,grouping[0].concat(grouping[1]));
 	    grouping.splice(1,1);
-	    hi_t.push(hi[iii]);
-	    iii++;
+	    hi[0].children.push(hi[1]);
+    	hi.splice(1,1);
 	}
 	Q.push(Q_t);
-    return [{name: "join all",children: hi_t,depth: lv+1, Q: Q_t},Q];;
+    return [hi[0],Q];;
   }
 }
