@@ -493,7 +493,8 @@ function a_array_ext(arr,av){
 			var nei = arr[iii][jjj].nei;
 			if (n>1)
 			{
-				arr[iii][jjj].nei = arr.length; 
+				arr[iii][jjj].nei = arr.length;
+				arr[iii][jjj].val = av; 
 				arr.push([{nei: iii, val: av},{nei: nei,val: av}]);
 				for (var z = 2; z<n;z++)
 				{
@@ -526,18 +527,40 @@ function finditem(grouping,li,graph){
   }
   return [g1,g2];
 }
+function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
+}
+
+
+function copyA(a){
+	var b=[];
+	a.forEach(function(e){
+		var bb=[];
+		e.forEach(function(e){
+			bb.push(clone(e));	
+			});
+		b.push(bb);
+	});
+	return b;
+}
 //virtual nodes
 function between_e(graph){
   var alink_o = a_array_av(graph); // orgiginal
   var av = alink_o[1];
   alink_o = alink_o[0];
-  var alink_o_c;
   var num_n = graph.nodes.length;// num of node
   var step=[];
   var num_l = graph.links.length;
   while (step.length!=graph.links.length){
-  	alink_o_c = alink_o;
-  	var alink_fix = a_array_ext(alink_o_c,av); // add virtual nodes
+  	var alink_oc = copyA(alink_o);
+  	//document.write("</br> old array size: "+alink_o[3][0].nei);
+  	var alink_fix = a_array_ext(alink_oc,av); // add virtual nodes
+  	//document.write("</br> old array size: "+alink_o[3][0].nei);
   	var alink = alink_fix[0]; //fixed
     // calculate
     var ebs=init(num_n,num_n);
@@ -557,6 +580,7 @@ function between_e(graph){
         var i = Q.shift();
         S.push(i);
         var l=Q.length;
+        //document.write("</br>"+i+": ");
         alink[i].forEach(function(e){
         	var j = e.nei;
 			if (d[j]==null){
@@ -603,7 +627,8 @@ function between_e(graph){
 				    	Pathd[i].concat(Pathd[j]);              	
 				  }
 				}
-	        }});
+	        }//document.write("</br>"+" - "+e.nei+": "+"d :"+d[e.nei]+"w :"+w[e.nei]);
+	    });
         if (Q.length ==l&&(i!=s)&&(i<num_n))
           Leaf.push(i);
   	}
@@ -627,45 +652,57 @@ function between_e(graph){
       //cont
       while (S.length!=0){
         var j = S.pop();
-        if (Pathd[j]!=null)
-        {
-          var sumb=1;
-          while (Pathd[j].length!=0){
-            var jj = Pathd[j].pop();
-            sumb+=eb[j][jj];
-          }
-          if (Pathu[j]!=null)
-          {
-            while (Pathu[j].length!=0){
-              var i = Pathu[j].pop();
-              eb[i][j]+=w[i]/w[j]*sumb;
-              eb[j][i]+=w[i]/w[j]*sumb;
-              ebs[i][j]+=w[i]/w[j]*sumb;
-              ebs[j][i]+=w[i]/w[j]*sumb;
-              if (ebs[i][j]>max_ebs[0]){
-                max_ebs[0]=ebs[i][j];
-                max_ebs[1]=i;
-                max_ebs[2]=j;
-              }
-            }
-          }
+        if (j<num_n){
+	        if (Pathd[j]!=null)
+	        {
+	          var sumb=1;
+	          while (Pathd[j].length!=0){
+	            var jj = Pathd[j].pop();
+	            sumb+=eb[j][jj];
+	          }
+	          if (Pathu[j]!=null)
+	          {
+	            while (Pathu[j].length!=0){
+	              var i = Pathu[j].pop();
+	              eb[i][j]+=w[i]/w[j]*sumb;
+	              eb[j][i]+=w[i]/w[j]*sumb;
+	              ebs[i][j]+=w[i]/w[j]*sumb;
+	              ebs[j][i]+=w[i]/w[j]*sumb;
+	              if (ebs[i][j]>max_ebs[0]){
+	                max_ebs[0]=ebs[i][j];
+	                max_ebs[1]=i;
+	                max_ebs[2]=j;
+	              }
+	            }
+	          }
+	      	}
         }
       }
     }
     if (max_ebs[0]!=0){
       step.push([max_ebs[1],max_ebs[2]]);
       av = av*num_l;
-      alink_o[max_ebs[1]].filter(function(n,i){
-      	if (n.nei== max_ebs[2]){
+
+      for (var i =0;i<alink_o[max_ebs[1]].length;i++){
+      	 //document.write("</br>"+"-- "+ alink_o[max_ebs[1]][i].nei);
+      	if (alink_o[max_ebs[1]][i].nei== max_ebs[2]){
       		av = av - alink_o[max_ebs[1]][i].val;
-			  num_l--;
-			  av = av/num_l;
-			  alink_o[max_ebs[1]].splice(i,1);
-      	}});
-      alink_o[max_ebs[2]].filter(function(n,i){
-      	if (n.nei== max_ebs[1])
-      		alink_o[max_ebs[2]].splice(i,1);});
+			num_l--;
+			av = av/num_l;
+			alink_o[max_ebs[1]].splice(i,1);
+			break;
+      	}
+      }
+
+      for (var i =0;i<alink_o[max_ebs[2]].length;i++){
+      	 //document.write("</br>"+"--- "+ alink_o[max_ebs[2]][i].nei);
+      	if (alink_o[max_ebs[2]][i].nei== max_ebs[1]){
+			alink_o[max_ebs[2]].splice(i,1);
+			break;
+      	}
+      }
     }
+    //document.write("----step: "+ step+"  av"+av);
   }
   return step;
 }
