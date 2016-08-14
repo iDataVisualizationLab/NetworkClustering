@@ -75,10 +75,12 @@ var node2;
 var node;
 var roots;
 var tree_deep_cv;
+/*
+<<<<<<< HEAD
 
-//d3.json("data/imdb.json", function(error, graph) {
-//d3.json("data/indexCards.json", function(error, graph) {
-d3.json("data/text.json", function(error, graph) {
+=======
+>>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
+d3.json("data/dataset1.json", function(error, graph) {
 if (error) throw error;
 //processing
 	var step = between_e(graph);
