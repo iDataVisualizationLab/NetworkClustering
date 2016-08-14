@@ -26,10 +26,13 @@ var bar_pos = [{x1:0, y1:height,x2:0, y2:0}];
 d3.select("#container").append("div").attr("id","group").attr("class","group").style("left",(margin.right+wtree_b)+"px");
 var svg = d3.select("#group").append("svg")
     .attr("width", wgroup)
-    .attr("height", hgroup);
+    .attr("height", hgroup)
 var svg_graph = d3.select("#treemap_graph").append("svg")
    // .style("background", "#eed")
 
+    .attr("width", wtree_b_g)
+    .attr("height", htree_b_g)
+    .append("g")
     .attr("width", wtree_b_g)
     .attr("height", htree_b_g)
     .attr("transform", "translate(" + [mtree_g.right, mtree_g.top] + ")");
@@ -37,6 +40,9 @@ d3.select("#treemap_main").append("div").attr("id","treemap_tree").attr("class",
 var svg4 = d3.select("#treemap_tree")
 	.append("svg")
     .style("position", "absolute")
+    .attr("width", wtree_b)
+    .attr("height", htree_b)
+    .append("g")
     .attr("width", wtree_b)
     .attr("height", htree_b)
     .attr("transform", "translate(" + [mtree.right, mtree.top] + ")");
