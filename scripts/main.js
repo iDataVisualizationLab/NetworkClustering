@@ -51,9 +51,9 @@ var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter((width-wtree_b)/2, height/2));
-var tree = d3.tree()
+var tree = d3.cluster()
     .size([htree, wtree])
-    //.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2); });
+    .separation(function(a, b) { return (a.parent == b.parent ? 1 : 4); });
 var bar = svg_bar.append("g")
       .attr("class", "bar")
       .attr("transform", "translate(" + [mtree_g.right, mtree_g.top] + ")");
@@ -81,12 +81,13 @@ var node2;
 var node;
 var roots;
 var tree_deep_cv;
+var radius = 6;
 /*
 <<<<<<< HEAD
 
 =======
 >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
-d3.json("data/dataset1.json", function(error, graph) {
+d3.json("data/dataset3.json", function(error, graph) {
 if (error) throw error;
 //processing
 	var step = between_e(graph);
@@ -100,14 +101,16 @@ if (error) throw error;
 	roots = d3.hierarchy(tree_hi[0]);
 	tree(roots);
 	var link2 = svg4.selectAll(".link")
-	  .data(roots.descendants().slice(1))
+	  .data(roots.descendants().slice(roots.name=="join all"?2:1))
 	  .enter().append("path")
 	  .attr("class", "link")
 	  .attr("d", function(d) {
 	    return "M" + [tree_deep(d.data.depth), d.x]
-	        + "C" + [(tree_deep(d.parent.data.depth)+tree_deep(d.data.depth))/2, d.x]
+           + "L" + [tree_deep(d.parent.data.depth), d.x]
+           + "L" + [tree_deep(d.parent.data.depth), d.parent.x];
+	        /*+ "C" + [(tree_deep(d.parent.data.depth)+tree_deep(d.data.depth))/2, d.x]
 	        + " " + [tree_deep(d.parent.data.depth), (d.x+d.parent.x)/2]
-	        + " " + [tree_deep(d.parent.data.depth), d.parent.x];
+	        + " " + [tree_deep(d.parent.data.depth), d.parent.x];*/
 	  })
 	  .attr("stroke", function(d) { return color(1); });
 
@@ -227,16 +230,15 @@ if (error) throw error;
       .links(graph.links);
 
   function ticked() {
+  	node
+        .attr("cx", function(d) { return d.x = Math.max(radius, Math.min(wgroup - radius, d.x)); })
+        .attr("cy", function(d) { return d.y = Math.max(radius, Math.min(hgroup - radius, d.y)); })
+        .attr("fill" , function(d){ return color(d.group)});
     link
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
-
-    node
-        .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; })
-        .attr("fill" , function(d){ return color(d.group)});
   }
   //---------------------init bar
 	bar_l2.attr("transform", function(d){
@@ -344,10 +346,14 @@ if (error) throw error;
 		  numofg=leave.length;
 		  clusterbox.select("text").text("# of cluster : "+leave.length+" | Q : "+Math.round(tree_hi[1][tree_hi[1].length-1-depth]*1000)/1000);
 		  for (var j=0;j<leave.length;j++){
+		  	//update for tree windown
 			node2.data(leave[j].leaves(), function(d) { return d.data.name; })
 			.selectAll("circle")
 			.attr("fill",function(d) { return color(j); });
 			var node_temp=[];
+			link2.data(leave[j].descendants(), function(d) { return d.data.name; })
+			.attr("stroke",function(d) { return color(j); });
+			//update for right group windown
 			leave[j].leaves().forEach(function (e){
 				simulation.nodes().filter(function(n){
 					if (n.id==e.data.name)
@@ -476,12 +482,33 @@ function a_array_av(ee){
 	  	if (e.target==n.id)
 	  		jj=i;
 	});
-	sum = sum+e.value;
-	a[ii].push({nei: jj,val: e.value});
-	a[jj].push({nei: ii,val: e.value});
+	sum = sum + (1/e.value);
+	a[ii].push({nei: jj,val: 1/e.value});
+	a[jj].push({nei: ii,val: 1/e.value});
     
 	});
   return [a,sum/m];
+}
+
+
+
+function calculate_m(ee){
+  var sum = 0;
+  var m = ee.links.length;
+  ee.links.forEach(function(e){
+  	var ii=0;
+  	var jj=0;
+  	ee.nodes.filter(function(n,i){
+	  if (e.source==n.id)
+	    ii=i;
+	  else
+	  	if (e.target==n.id)
+	  		jj=i;
+	});
+	sum = sum+e.value;
+    
+	});
+  return [sum];
 }
 
 function a_array_ext(arr,av){
@@ -489,7 +516,7 @@ function a_array_ext(arr,av){
 	for (var iii=0;iii<l;iii++){
 		for (var jjj=0; jjj<arr[iii].length;jjj++)
 		{
-			var n = Math.ceil(arr[iii][jjj].val/av);
+			var n = Math.round(arr[iii][jjj].val/av);
 			var nei = arr[iii][jjj].nei;
 			if (n>1)
 			{
@@ -747,7 +774,7 @@ function tree_mapingv3(step,graph){
   var grouping = [];	
   var ed = step.pop();
   var lv = 1;
-  var m = graph.links.length;
+  var m = calculate_m(graph);
   var A = a_array(graph);
   var a_e = [];
   var Q = [];
