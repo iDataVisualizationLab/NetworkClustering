@@ -23,6 +23,10 @@ var htree = htree_b-mtree.top-mtree.bottom;
 var wgroup = width-wtree-mtree.left-mtree_g.right;
 var hgroup = height;
 var bar_pos = [{x1:0, y1:height,x2:0, y2:0}];
+
+var wtime = 300;
+var htime = 50;
+var mtime = {top: (hgroup-htime), right: 0, bottom: 0, left: (wgroup-wtime)};
 d3.select("#container").append("div").attr("id","group").attr("class","group").style("left",(margin.right+wtree_b)+"px");
 var svg = d3.select("#group").append("svg")
     .attr("width", wgroup)
@@ -88,13 +92,21 @@ var node;
 var roots;
 var tree_deep_cv;
 var radius = 6;
-d3.json("data/vis.json", function(error, graph) {
+/*
+<<<<<<< HEAD
+
+=======
+>>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
+d3.json("data/dataset3.json", function(error, graph) {
 if (error) throw error;
+var start_time = performance.now();
 //processing
 	var step = between_e(graph);
+var end_time_b = performance.now();
 	var max_lv=step.length+1;
 // tree
 	var tree_hi = tree_mapingv3(step,graph);
+var end_time_t = performance.now();
 	var tree_deep = d3.scaleLinear().domain([tree_hi[0].depth,0]).range([0,wtree]); 
 	tree_deep_cv = d3.scaleLinear().domain([tree_hi[0].depth,0]).range([0,tree_hi[1].length]); 
 	tree_dx = wtree/tree_hi[1].length;
@@ -134,6 +146,20 @@ if (error) throw error;
 	      .attr("class","clusterbox")
 	      .style("display","none");
 	clusterbox.append("text");
+	var time_box = svg.append("g")
+		//.attr("transform","translate(" + mtime.left +","+ mtime.top + ")");
+
+        .attr("class","timebox")
+		.attr("width",wtime)
+		.attr("height",htime)
+		.attr("transform","translate(" + mtime.left +","+ mtime.top + ")");
+		time_box
+		.append("text")
+		.text("Time compute betweenness edge: "+Math.round(end_time_b-start_time)+ " ms");
+		time_box
+		.append("text")
+		.attr("transform","translate(" + 0 +","+ 15 + ")")
+		.text("Time compue Q: "+Math.round(end_time_t - end_time_b+start_time)+ " ms");
   //-------------graph
   	var domain = {x:{min:0,max:0},y:{min:0,max:0}}; 
   	domain.y.min = d3.min(tree_hi[1]);
@@ -555,6 +581,7 @@ function finditem(grouping,li,graph){
   }
   return [g1,g2];
 }
+
 function clone(obj) {
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
