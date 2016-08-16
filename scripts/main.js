@@ -10,13 +10,13 @@ var height = 750 - margin.top - margin.bottom;
 
 var wtree_b_g = width*0.25;
 var htree_b_g = width*0.125;
-var mtree_g = {top: 10, right: 30, bottom: 50, left: 50};
+var mtree_g = {top: 10, right: 50, bottom: 50, left: 50};
 var wtree_g = wtree_b_g-mtree_g.left-mtree_g.right;
 var htree_g = htree_b_g-mtree_g.top-mtree_g.bottom;
 
 var wtree_b = width*0.25;
 var htree_b = height-htree_b_g;
-var mtree = {top: 10, right: 30, bottom: 0, left: 50};
+var mtree = {top: 10, right: 50, bottom: 0, left: 50};
 var wtree = wtree_b-mtree.left-mtree.right;
 var htree = htree_b-mtree.top-mtree.bottom;
 
@@ -309,7 +309,7 @@ var end_time_t = performance.now();
 		    .attr("y2",0);    
    	bar_l2.attr("x1",function(d){d.x1 = x0; return bar_pos.x1});
   var numofg=1;
-  update_group(max_Q.pos);
+  update_group(tree_hi[1].length-max_Q.pos);
   //---------------
   bar_l2.call(d3.drag()
 	.on("start", dragstarted_bar)
