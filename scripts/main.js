@@ -10,13 +10,13 @@ var height = 750 - margin.top - margin.bottom;
 
 var wtree_b_g = width*0.25;
 var htree_b_g = width*0.125;
-var mtree_g = {top: 10, right: 20, bottom: 30, left: 10};
+var mtree_g = {top: 10, right: 30, bottom: 50, left: 50};
 var wtree_g = wtree_b_g-mtree_g.left-mtree_g.right;
 var htree_g = htree_b_g-mtree_g.top-mtree_g.bottom;
 
 var wtree_b = width*0.25;
 var htree_b = height-htree_b_g;
-var mtree = {top: 10, right: 20, bottom: 0, left: 10};
+var mtree = {top: 10, right: 30, bottom: 0, left: 50};
 var wtree = wtree_b-mtree.left-mtree.right;
 var htree = htree_b-mtree.top-mtree.bottom;
 
@@ -27,7 +27,7 @@ var bar_pos = [{x1:0, y1:height,x2:0, y2:0}];
 var wtime = 300;
 var htime = 50;
 var mtime = {top: (hgroup-htime), right: 0, bottom: 0, left: (wgroup-wtime)};
-d3.select("#container").append("div").attr("id","group").attr("class","group").style("left",(margin.right+wtree_b)+"px");
+d3.select("#container").append("div").attr("id","group").attr("class","group").style("left",(margin.left+wtree_b)+"px");
 var svg = d3.select("#group").append("svg")
     .attr("width", wgroup)
     .attr("height", hgroup)
@@ -38,8 +38,8 @@ var svg_graph = d3.select("#treemap_graph").append("svg")
     .attr("height", htree_b_g)
     .append("g")
     .attr("width", wtree_b_g)
-    .attr("height", htree_b_g)
-    .attr("transform", "translate(" + [mtree_g.right, mtree_g.top] + ")");
+    .attr("height", htree_b_g);
+
 d3.select("#treemap_main").append("div").attr("id","treemap_tree").attr("class","treemap_tree").style("top",(margin.top+htree_b_g)+"px");
 var svg4 = d3.select("#treemap_tree")
 	.append("svg")
@@ -49,11 +49,12 @@ var svg4 = d3.select("#treemap_tree")
     .append("g")
     .attr("width", wtree_b)
     .attr("height", htree_b)
-    .attr("transform", "translate(" + [mtree.right, mtree.top] + ")");
+    .attr("transform", "translate(" + [mtree.left, mtree.top] + ")");
 var svg_bar = d3.select("#treemap_bar").append("svg")
    // .style("background", "#eed")
     .attr("width", wtree_b)
     .attr("height", height);
+    //.attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")");
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
 
@@ -63,16 +64,16 @@ var simulation = d3.forceSimulation()
     .force("center", d3.forceCenter((width-wtree_b)/2, height/2));
 var tree = d3.cluster()
     .size([htree, wtree])
-    .separation(function(a, b) { return (a.parent == b.parent ? 1 : 4); });
+    .separation(function(a, b) { return 1; });
 var bar = svg_bar.append("g")
       .attr("class", "bar")
-      .attr("transform", "translate(" + [mtree_g.right, mtree_g.top] + ")");
+      .attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")");
 var bar_l1 = bar
     .append("line")
     .classed('b',true)
     .data(bar_pos)
      .style("stroke-dasharray",  "4, 2")
-     .style("stroke-width", "3px")
+     .style("stroke-width", "2px")
     .attr("x1", function(d) { return d.x1; })
     .attr("y1", function(d) { return d.y1; })
     .attr("x2", function(d) { return d.x2; })
@@ -94,6 +95,7 @@ var tree_deep_cv;
 var radius = 6;
 d3.json("data/vis.json", function(error, graph) {
 if (error) throw error;
+var num_n = graph.nodes.length;
 var start_time = performance.now();
 //processing
 	var step = between_e(graph);
@@ -122,21 +124,31 @@ var end_time_t = performance.now();
 	  })
 	  .attr("stroke", function(d) { return color(1); });
 
+	function size_scale (){
+		if (num_n*2*4<htree)
+			return 1;
+		else
+			return htree/(num_n*2*4);
+	} 
+	var resize = size_scale();
+
 	node2 = svg4.selectAll(".node")
 	      .data(roots.leaves(),function(d) { return d.data.name; })
 	      .enter().append("g")
 	      .attr("class", " node--leaf")
 	      .attr("transform", function(d) { return "translate(" + [tree_deep(d.data.depth), d.x] + ")"; });
 	node2.append("circle")
-	      .attr("r", 5)
+	      .attr("r", resize*4)
 	      .attr("fill", function(d) { return color(1) });
 
 	node2.append("text")
-	      .attr("dy", ".31em")
-	      .attr("x", -6)
-	      .style("text-anchor", "end")
-	      .attr("transform", function(d) { return "rotate(" + (0) + ")"; })
+	      .attr("y", resize*4)
+	      .attr("x", resize*4+1)
+	      //.style("text-anchor", "end")
+	      .style("font-size",9*resize+"px")
+	      //.attr("transform", function(d) { return "rotate(" + (0) + ")"; })
 	      .text(function(d) { return d.data.name; });
+
 	var clusterbox = d3.select("#treemap_tree").append("rect")
 	      .attr("class","clusterbox")
 	      .style("display","none");
@@ -161,26 +173,40 @@ var end_time_t = performance.now();
   	domain.y.max = (d3.max(tree_hi[1])-d3.min(tree_hi[1]))*1.1+d3.min(tree_hi[1]);
 
 	var y_range = d3.scaleLinear().domain([domain.y.min, domain.y.max]).range([htree_g, 0]);
-	var x_range = d3.scaleLinear().domain([0, tree_hi[1].length-1]).range([wtree_g, 0]);
+	var x_range = d3.scaleLinear().domain([tree_hi[1].length,1]).range([wtree_g, 0]);
 	var max_Q = {pos:0,val:tree_hi[1][0]};
 	var line_g = d3.line()
-	    .x(function(d,i) { if(d>max_Q.val){max_Q.val = d; max_Q.pos = i} return x_range(i); })
+	    .x(function(d,i) { if(d>max_Q.val){max_Q.val = d; max_Q.pos = i} return x_range(tree_hi[1].length-i); })
 	    .y(function(d) { return y_range(d); });
 	svg_graph.append("g")
 	  .attr("class", "axis axis--x")
-	  .attr("transform", "translate(0," + htree_g + ")")
+	  .attr("transform", "translate(" + [mtree_g.left, mtree_g.top+htree_g] + ")")
 	  .call(d3.axisBottom(x_range));
 	svg_graph.append("g")
 	  .attr("class", "axis axis--y")
+	  .attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")")
       .call(d3.axisLeft(y_range));
 
 	svg_graph.append("path")
       .attr("class", "graph")
+      .attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")")
       .data([1])
   		.attr("d", line_g(tree_hi[1]));
 
+  	svg_graph.append("text")
+  	        .attr("text-anchor", "middle")
+            .attr("transform", "translate("+ [mtree_g.left-35, mtree_g.top+htree_g/2] +")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Modularity - Q");
+    svg_graph.append("text")
+  	        .attr("text-anchor", "middle")
+            .attr("transform", "translate("+ [mtree_g.left+wtree_g/2, mtree_g.top+htree_g+35]+")")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Number of cluster");
+
   	focus = svg_graph.append("g")
+  	.attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")")
+  	.append("g")
       .attr("class", "focus")
+
       .style("display", "none");
 
 	focus.append("circle")
@@ -239,11 +265,11 @@ var end_time_t = performance.now();
           .on("end", dragended));
 
   node.append("title")
-      .text(function(d) { return d.id; });
+      .text(function(d) { return d.name!=null?d.name:d.id; });
   node.append("text")
     .attr("dx", 12)
     .attr("dy", ".35em")
-    .text(function(d) { return d.id });
+    .text(function(d) { return d.name!=null?d.name:d.id; });
   simulation
       .nodes(graph.nodes)
       .on("tick", ticked);
@@ -264,10 +290,10 @@ var end_time_t = performance.now();
   }
   //---------------------init bar
 	bar_l2.attr("transform", function(d){
-        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
+        return "translate(" + [ x_range(tree_hi[1].length-max_Q.pos),0 ] + ")"});
 	bar_l1.attr("transform", function(d){
-        return "translate(" + [ x_range(max_Q.pos),0 ] + ")"});
-	var x0 = x_range(max_Q.pos);
+        return "translate(" + [ x_range(tree_hi[1].length-max_Q.pos),0 ] + ")"});
+	var x0 = x_range(tree_hi[1].length-max_Q.pos);
         y0 = y_range(max_Q.val);
 		    focus.attr("transform", "translate(" + x0 + "," + y0 + ")");
 		    focus.select("text").text(y0);
@@ -278,7 +304,7 @@ var end_time_t = performance.now();
 		    .attr("y2",0);    
    	bar_l2.attr("x1",function(d){d.x1 = x0; return bar_pos.x1});
   var numofg=1;
-  update_group(tree_hi[1].length-1-max_Q.pos);
+  update_group(max_Q.pos);
   //---------------
   bar_l2.call(d3.drag()
 	.on("start", dragstarted_bar)
@@ -297,13 +323,13 @@ var end_time_t = performance.now();
 	focus.style('display', null);
 	clusterbox.style("display",null);
 	var x0 = Math.round(x_range.invert(d.x1));
-        d = y_range(tree_hi[1][x0]);
+        d = y_range(tree_hi[1][tree_hi[1].length-x0]);
     focus.attr("transform", "translate(" + x_range(x0)+ "," + (d ) + ")");
-    focus.select("text").text(tree_hi[1][x0]);
+    focus.select("text").text(tree_hi[1][tree_hi[1].length-x0]);
     focus.select("line.x")
     .attr("x1",0)
     .attr("y1",0)
-    .attr("x2",x_range(x0))
+    .attr("x2",x_range(tree_hi[1].length-x0))
     .attr("y2",0);
   }
 
@@ -325,10 +351,10 @@ var end_time_t = performance.now();
 	  	}
 	  	
 	  }
-	  var x0 = Math.floor(x_range.invert(d.x1));
-		        d = y_range(tree_hi[1][x0]);
+	  var x0 = Math.round(x_range.invert(d.x1));
+		        d = y_range(tree_hi[1][tree_hi[1].length-x0]);
 		    focus.attr("transform", "translate(" + x_range(x0)+ "," + (d ) + ")");
-		    focus.select("text").text(tree_hi[1][x0]);
+		    focus.select("text").text(tree_hi[1][tree_hi[1].length-x0]);
 		    focus.select("line.x")
 		    .attr("x1",0)
 		    .attr("y1",0)
@@ -341,7 +367,7 @@ var end_time_t = performance.now();
 		bar_l2.style("opacity", "0")
 		.on("mouseout",mouseout);;
 			focus.style('display', "none");
-		var depth = Math.floor(d.x1/tree_dx);
+		var depth = Math.round(d.x1/tree_dx);
 		if (depth<0)
 			depth=0;
 		else
@@ -378,7 +404,7 @@ var end_time_t = performance.now();
 			//update for right group windown
 			leave[j].leaves().forEach(function (e){
 				simulation.nodes().filter(function(n){
-					if (n.id==e.data.name)
+					if ((n.name!=null)&&(n.name==e.data.name)||(n.id==e.data.name))
 					{
 						n.group=j;
 						node_temp.push(n);
@@ -808,7 +834,7 @@ function tree_mapingv3(step,graph){
   Q_t +=  delta_Q(ed[0],ed[1],m,A,a_e);
   //----
   Q.push(Q_t);
-  var hi=[{name: [ed[0],ed[1]],children: [{name: graph.nodes[ed[0]].id, depth: 0},{name: graph.nodes[ed[1]].id, depth: 0}], depth: lv, Q: Q_t}];
+  var hi=[{name: [ed[0],ed[1]],children: [{name: graph.nodes[ed[0]].name!=null?graph.nodes[ed[0]].name:graph.nodes[ed[0]].id, depth: 0},{name: graph.nodes[ed[1]].name!=null?graph.nodes[ed[1]].name:graph.nodes[ed[1]].id, depth: 0}], depth: lv, Q: Q_t}];
   while (step.length!=0){
     var li=step.pop();
     // 4 main case
@@ -847,7 +873,7 @@ function tree_mapingv3(step,graph){
 	    //move
 	    grouping[g1].push(li[0]);
 	    hi[g1]={name: li,children: [hi[g1]], depth: lv, Q:Q_t};
-	    hi[g1].children.push({name: graph.nodes[li_t[0]].id, depth: 0});
+	    hi[g1].children.push({name: graph.nodes[li_t[0]].name!=null?graph.nodes[li_t[0]].name:graph.nodes[li_t[0]].id , depth: 0});
 	    //document.write("case 2 "+JSON.stringify(hi)+"</br>");
 	  }
 	}else{
@@ -859,7 +885,7 @@ function tree_mapingv3(step,graph){
 	    Q.push(Q_t);
 	    //move
 	    grouping.push(li);
-	    hi.push({name: li,children: [{name: graph.nodes[li[0]].id, depth: 0},{name: graph.nodes[li[1]].id, depth: 0}], depth: lv, Q: Q_t});
+	    hi.push({name: li,children: [{name: graph.nodes[li[0]].name!=null?graph.nodes[li[0]].name:graph.nodes[li[0]].id, depth: 0},{name: graph.nodes[li[1]].name!=null?graph.nodes[li[1]].name:graph.nodes[li[1]].id, depth: 0}], depth: lv, Q: Q_t});
 	    //document.write("case 3 "+JSON.stringify(hi)+"</br>");
 	  }
 	}
