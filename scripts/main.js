@@ -4,9 +4,13 @@ var svg_ti = d3.select("#title").append("svg")
     svg_ti.append("rect").attr("width","100%")
     .attr("height","30px").attr("background","#000");*/
 //body
-var margin = {top: 0, right: 0, bottom: 0, left: 0};
-var width = document.body.clientWidth - margin.left - margin.right;
-var height = 750 - margin.top - margin.bottom;
+var margin = {top: 0, right: 20, bottom: 20, left: 0};
+var width = (window.innerWidth
+|| document.documentElement.clientWidth
+|| document.body.clientWidth) - margin.left - margin.right;
+var height = (window.innerHeight
+|| document.documentElement.clientHeight
+|| document.body.clientHeight) - margin.top - margin.bottom;
 
 var wtree_b_g = width*0.25;
 var htree_b_g = width*0.125;
@@ -26,7 +30,7 @@ var bar_pos = [{x1:0, y1:height,x2:0, y2:0}];
 
 var wtime = 300;
 var htime = 50;
-var mtime = {top: (hgroup-htime), right: 0, bottom: 0, left: (wgroup-wtime)};
+var mtime = {top: (hgroup-htime-10), right: 0, bottom: 0, left: (wgroup-wtime-10)};
 d3.select("#container").append("div").attr("id","group").attr("class","group").style("left",(margin.left+wtree_b)+"px");
 var svg = d3.select("#group").append("svg")
     .attr("width", wgroup)
@@ -112,7 +116,7 @@ var end_time_t = performance.now();
 	roots = d3.hierarchy(tree_hi[0]);
 	tree(roots);
 	var link2 = svg4.selectAll(".link")
-	  .data(roots.descendants().slice(roots.name=="join all"?2:1))
+	  .data(roots.descendants().slice(roots.name=="join all"?(roots.children.length+1):1))
 	  .enter().append("path")
 	  .attr("class", "link")
 	  .attr("d", function(d) {
@@ -161,12 +165,15 @@ var end_time_t = performance.now();
 		.attr("width",wtime)
 		.attr("height",htime)
 		.attr("transform","translate(" + mtime.left +","+ mtime.top + ")");
+		time_box.append("rect").attr("width",wtime)
+		.attr("height",htime);
 		time_box
 		.append("text")
+		.attr("transform","translate("+[10,20]+")")
 		.text("Computing time for betweenness edge: "+Math.round(end_time_b-start_time)+ " ms");
 		time_box
 		.append("text")
-		.attr("transform","translate(" + 0 +","+ 15 + ")")
+		.attr("transform","translate("+[10,35]+")")
 		.text("Computing time for Modularity Q: "+Math.round(end_time_t - end_time_b+start_time)+ " ms");
   //-------------graph
   	var domain = {x:{min:0,max:0},y:{min:0,max:0}}; 
@@ -179,12 +186,14 @@ var end_time_t = performance.now();
 	var line_g = d3.line()
 	    .x(function(d,i) { if(d>max_Q.val){max_Q.val = d; max_Q.pos = i} return x_range(tree_hi[1].length-i); })
 	    .y(function(d) { return y_range(d); });
+
 	svg_graph.append("g")
 	  .attr("class", "axis axis--x")
 	  .attr("transform", "translate(" + [mtree_g.left, mtree_g.top+htree_g] + ")")
-	  .call(d3.axisBottom(x_range));
+	  .call(d3.axisBottom(x_range).tickSize(5));
+
 	svg_graph.append("g")
-	  .attr("class", "axis axis--y")
+	  .attr("class", "axis axis--x")
 	  .attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")")
       .call(d3.axisLeft(y_range));
 
@@ -195,10 +204,12 @@ var end_time_t = performance.now();
   		.attr("d", line_g(tree_hi[1]));
 
   	svg_graph.append("text")
+  			.attr("class","graph-title")
   	        .attr("text-anchor", "middle")
             .attr("transform", "translate("+ [mtree_g.left-35, mtree_g.top+htree_g/2] +")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
             .text("Modularity - Q");
     svg_graph.append("text")
+    		.attr("class","graph-title")
   	        .attr("text-anchor", "middle")
             .attr("transform", "translate("+ [mtree_g.left+wtree_g/2, mtree_g.top+htree_g+35]+")")  // text is drawn off the screen top left, move down and out and rotate
             .text("Number of clusters");
@@ -297,7 +308,7 @@ var end_time_t = performance.now();
 	var x0 = x_range(tree_hi[1].length-max_Q.pos);
         y0 = y_range(max_Q.val);
 		    focus.attr("transform", "translate(" + x0 + "," + y0 + ")");
-		    focus.select("text").text(y0);
+		    focus.select("text").text(max_Q.val);
 		    focus.select("line.x")
 		    .attr("x1",0)
 		    .attr("y1",0)
@@ -305,7 +316,7 @@ var end_time_t = performance.now();
 		    .attr("y2",0);    
    	bar_l2.attr("x1",function(d){d.x1 = x0; return bar_pos.x1});
   var numofg=1;
-  update_group(tree_hi[1].length-max_Q.pos);
+  update_group(tree_hi[1].length-max_Q.pos-1);
   //---------------
   bar_l2.call(d3.drag()
 	.on("start", dragstarted_bar)
@@ -330,7 +341,7 @@ var end_time_t = performance.now();
     focus.select("line.x")
     .attr("x1",0)
     .attr("y1",0)
-    .attr("x2",x_range(tree_hi[1].length-x0))
+    .attr("x2",-x_range(x0))
     .attr("y2",0);
   }
 
@@ -368,10 +379,10 @@ var end_time_t = performance.now();
 		bar_l2.style("opacity", "0")
 		.on("mouseout",mouseout);;
 			focus.style('display', "none");
-		var depth = Math.round(d.x1/tree_dx);
+		var depth = Math.round(x_range.invert(d.x1))-1;
 		if (depth<0)
 			depth=0;
-		else
+		//update_group(depth tree_hi[1].length-max_Q.pos-1);
 		  update_group(depth);
 	}
 
