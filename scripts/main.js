@@ -116,7 +116,7 @@ var end_time_t = performance.now();
 	roots = d3.hierarchy(tree_hi[0]);
 	tree(roots);
 	var link2 = svg4.selectAll(".link")
-	  .data(roots.descendants().slice(roots.name=="join all"?roots.children.length:1))
+	  .data(roots.descendants().slice(roots.name=="join all"?(roots.children.length+1):1))
 	  .enter().append("path")
 	  .attr("class", "link")
 	  .attr("d", function(d) {
@@ -165,12 +165,15 @@ var end_time_t = performance.now();
 		.attr("width",wtime)
 		.attr("height",htime)
 		.attr("transform","translate(" + mtime.left +","+ mtime.top + ")");
+		time_box.append("rect").attr("width",wtime)
+		.attr("height",htime);
 		time_box
 		.append("text")
+		.attr("transform","translate("+[10,20]+")")
 		.text("Computing time for betweenness edge: "+Math.round(end_time_b-start_time)+ " ms");
 		time_box
 		.append("text")
-		.attr("transform","translate(" + 0 +","+ 15 + ")")
+		.attr("transform","translate("+[10,35]+")")
 		.text("Computing time for Modularity Q: "+Math.round(end_time_t - end_time_b+start_time)+ " ms");
   //-------------graph
   	var domain = {x:{min:0,max:0},y:{min:0,max:0}}; 
@@ -183,12 +186,14 @@ var end_time_t = performance.now();
 	var line_g = d3.line()
 	    .x(function(d,i) { if(d>max_Q.val){max_Q.val = d; max_Q.pos = i} return x_range(tree_hi[1].length-i); })
 	    .y(function(d) { return y_range(d); });
+
 	svg_graph.append("g")
 	  .attr("class", "axis axis--x")
 	  .attr("transform", "translate(" + [mtree_g.left, mtree_g.top+htree_g] + ")")
-	  .call(d3.axisBottom(x_range));
+	  .call(d3.axisBottom(x_range).tickSize(5));
+
 	svg_graph.append("g")
-	  .attr("class", "axis axis--y")
+	  .attr("class", "axis axis--x")
 	  .attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")")
       .call(d3.axisLeft(y_range));
 
@@ -199,10 +204,12 @@ var end_time_t = performance.now();
   		.attr("d", line_g(tree_hi[1]));
 
   	svg_graph.append("text")
+  			.attr("class","graph-title")
   	        .attr("text-anchor", "middle")
             .attr("transform", "translate("+ [mtree_g.left-35, mtree_g.top+htree_g/2] +")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
             .text("Modularity - Q");
     svg_graph.append("text")
+    		.attr("class","graph-title")
   	        .attr("text-anchor", "middle")
             .attr("transform", "translate("+ [mtree_g.left+wtree_g/2, mtree_g.top+htree_g+35]+")")  // text is drawn off the screen top left, move down and out and rotate
             .text("Number of clusters");
