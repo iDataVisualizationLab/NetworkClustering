@@ -55,7 +55,7 @@ var svg_bar = d3.select("#treemap_bar").append("svg")
     .attr("width", wtree_b)
     .attr("height", height);
     //.attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")");
-var color = d3.scaleOrdinal(d3.schemeCategory20);
+var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 
 var simulation = d3.forceSimulation()
