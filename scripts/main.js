@@ -4,9 +4,13 @@ var svg_ti = d3.select("#title").append("svg")
     svg_ti.append("rect").attr("width","100%")
     .attr("height","30px").attr("background","#000");*/
 //body
-var margin = {top: 0, right: 0, bottom: 0, left: 0};
-var width = document.body.clientWidth - margin.left - margin.right;
-var height = 750 - margin.top - margin.bottom;
+var margin = {top: 0, right: 20, bottom: 20, left: 0};
+var width = (window.innerWidth
+|| document.documentElement.clientWidth
+|| document.body.clientWidth) - margin.left - margin.right;
+var height = (window.innerHeight
+|| document.documentElement.clientHeight
+|| document.body.clientHeight) - margin.top - margin.bottom;
 
 var wtree_b_g = width*0.25;
 var htree_b_g = width*0.125;
@@ -26,7 +30,7 @@ var bar_pos = [{x1:0, y1:height,x2:0, y2:0}];
 
 var wtime = 300;
 var htime = 50;
-var mtime = {top: (hgroup-htime), right: 0, bottom: 0, left: (wgroup-wtime)};
+var mtime = {top: (hgroup-htime-10), right: 0, bottom: 0, left: (wgroup-wtime-10)};
 d3.select("#container").append("div").attr("id","group").attr("class","group").style("left",(margin.left+wtree_b)+"px");
 var svg = d3.select("#group").append("svg")
     .attr("width", wgroup)
