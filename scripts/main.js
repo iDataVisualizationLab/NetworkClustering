@@ -93,6 +93,7 @@ var node;
 var roots;
 var tree_deep_cv;
 var radius = 6;
+
 d3.json("data/vis.json", function(error, graph) {
 if (error) throw error;
 var num_n = graph.nodes.length;
