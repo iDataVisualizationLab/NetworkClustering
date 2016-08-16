@@ -150,7 +150,7 @@ var end_time_t = performance.now();
 	      .attr("y", resize*4)
 	      .attr("x", resize*4+1)
 	      //.style("text-anchor", "end")
-	      .style("font-size",9*resize+"px")
+	      .style("font-size",9.5*resize+"px")
 	      //.attr("transform", function(d) { return "rotate(" + (0) + ")"; })
 	      .text(function(d) { return d.data.name; });
 
@@ -167,11 +167,11 @@ var end_time_t = performance.now();
 		.attr("transform","translate(" + mtime.left +","+ mtime.top + ")");
 		time_box
 		.append("text")
-		.text("Time compute betweenness edge: "+Math.round(end_time_b-start_time)+ " ms");
+		.text("Computing time for betweenness edge: "+Math.round(end_time_b-start_time)+ " ms");
 		time_box
 		.append("text")
 		.attr("transform","translate(" + 0 +","+ 15 + ")")
-		.text("Time compue Q: "+Math.round(end_time_t - end_time_b+start_time)+ " ms");
+		.text("Computing time for Modularity Q: "+Math.round(end_time_t - end_time_b+start_time)+ " ms");
   //-------------graph
   	var domain = {x:{min:0,max:0},y:{min:0,max:0}}; 
   	domain.y.min = d3.min(tree_hi[1]);
@@ -205,7 +205,7 @@ var end_time_t = performance.now();
     svg_graph.append("text")
   	        .attr("text-anchor", "middle")
             .attr("transform", "translate("+ [mtree_g.left+wtree_g/2, mtree_g.top+htree_g+35]+")")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Number of cluster");
+            .text("Number of clusters");
 
   	focus = svg_graph.append("g")
   	.attr("transform", "translate(" + [mtree_g.left, mtree_g.top] + ")")
@@ -397,7 +397,7 @@ var end_time_t = performance.now();
 			}
 		  }
 		  numofg=leave.length;
-		  clusterbox.select("text").text("# of cluster : "+leave.length+" | Q : "+Math.round(tree_hi[1][tree_hi[1].length-1-depth]*1000)/1000);
+		  clusterbox.select("text").text("# of clusters : "+leave.length+" | Q : "+Math.round(tree_hi[1][tree_hi[1].length-1-depth]*1000)/1000);
 		  for (var j=0;j<leave.length;j++){
 		  	//update for tree windown
 			node2.data(leave[j].leaves(), function(d) { return d.data.name; })
