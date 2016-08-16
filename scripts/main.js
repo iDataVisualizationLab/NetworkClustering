@@ -98,7 +98,7 @@ var radius = 6;
 
 =======
 >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
-d3.json("data/dataset3.json", function(error, graph) {
+d3.json("data/dataset1.json", function(error, graph) {
 if (error) throw error;
 var num_n = graph.nodes.length;
 var start_time = performance.now();
@@ -301,7 +301,7 @@ var end_time_t = performance.now();
 	var x0 = x_range(tree_hi[1].length-max_Q.pos);
         y0 = y_range(max_Q.val);
 		    focus.attr("transform", "translate(" + x0 + "," + y0 + ")");
-		    focus.select("text").text(y0);
+		    focus.select("text").text(max_Q.val);
 		    focus.select("line.x")
 		    .attr("x1",0)
 		    .attr("y1",0)
@@ -309,7 +309,7 @@ var end_time_t = performance.now();
 		    .attr("y2",0);    
    	bar_l2.attr("x1",function(d){d.x1 = x0; return bar_pos.x1});
   var numofg=1;
-  update_group(tree_hi[1].length-max_Q.pos);
+  update_group(tree_hi[1].length-max_Q.pos-1);
   //---------------
   bar_l2.call(d3.drag()
 	.on("start", dragstarted_bar)
@@ -334,7 +334,7 @@ var end_time_t = performance.now();
     focus.select("line.x")
     .attr("x1",0)
     .attr("y1",0)
-    .attr("x2",x_range(tree_hi[1].length-x0))
+    .attr("x2",-x_range(x0))
     .attr("y2",0);
   }
 
@@ -372,10 +372,10 @@ var end_time_t = performance.now();
 		bar_l2.style("opacity", "0")
 		.on("mouseout",mouseout);;
 			focus.style('display', "none");
-		var depth = Math.round(d.x1/tree_dx);
+		var depth = Math.round(x_range.invert(d.x1))-1;
 		if (depth<0)
 			depth=0;
-		else
+		//update_group(depth tree_hi[1].length-max_Q.pos-1);
 		  update_group(depth);
 	}
 
