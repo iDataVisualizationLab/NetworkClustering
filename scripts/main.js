@@ -92,12 +92,7 @@ var node;
 var roots;
 var tree_deep_cv;
 var radius = 6;
-/*
-<<<<<<< HEAD
-
-=======
->>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
-d3.json("data/dataset3.json", function(error, graph) {
+d3.json("data/vis.json", function(error, graph) {
 if (error) throw error;
 var start_time = performance.now();
 //processing
