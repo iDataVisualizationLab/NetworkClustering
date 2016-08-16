@@ -98,7 +98,7 @@ var radius = 6;
 
 =======
 >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
-d3.json("data/dataset1.json", function(error, graph) {
+d3.json("data/dataset3.json", function(error, graph) {
 if (error) throw error;
 var num_n = graph.nodes.length;
 var start_time = performance.now();
@@ -116,7 +116,7 @@ var end_time_t = performance.now();
 	roots = d3.hierarchy(tree_hi[0]);
 	tree(roots);
 	var link2 = svg4.selectAll(".link")
-	  .data(roots.descendants().slice(roots.name=="join all"?2:1))
+	  .data(roots.descendants().slice(roots.name=="join all"?roots.children.length:1))
 	  .enter().append("path")
 	  .attr("class", "link")
 	  .attr("d", function(d) {
