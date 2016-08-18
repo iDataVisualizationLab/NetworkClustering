@@ -823,7 +823,8 @@ function delta_Q(i,j,m,A,a_e){
 			A[i][k] += A[j][k];
 			A[k][i] = A [i][k];
 			A[j][k] = 0;
-			sum += A[i][k]*2; 
+			A[k][j] = 0;
+			sum += A[i][k]; 
 		}
 	}
 	a_e[i] = sum/2/m;
