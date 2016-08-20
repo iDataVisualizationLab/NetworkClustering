@@ -282,6 +282,9 @@ var end_time_t = performance.now();
     .attr("dx", 12)
     .attr("dy", ".35em")
     .text(function(d) { return d.name!=null?d.name:d.id; });
+  
+  simulation.force("charge", d3.forceManyBody().strength(function(){return -wgroup/graph.nodes.length}));
+  
   simulation
       .nodes(graph.nodes)
       .on("tick", ticked);
