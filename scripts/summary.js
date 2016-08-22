@@ -120,8 +120,9 @@ var layers;
 
 d3.selectAll(".joint-toggle input").on("change", changeChartMode);
 d3.select("#save_button").attr("onclick", "save_file()");
-
-d3.queue().defer(updateData,"vis").awaitAll(function(error, results) {
+d3.select("#try_button").attr("onclick","updateData(name_file)");
+d3.select("#name_file").attr("onchange","readData(value)");
+d3.queue().defer(readData,"vis").awaitAll(function(error, results) {
       if (error) throw error;
       console.log(results);
     });
@@ -133,10 +134,66 @@ d3.queue().defer(updateData,"vis").awaitAll(function(error, results) {
 var yAxis = d3.svg.axis()
     .scale(yScale)
     .orient("left");*/
+function readData(value) {
+	d3.json("data/"+value.toUpperCase()+"_time.json", function(error, data_raw) {
+		if (error) throw error;
+		title_text.text("Computing time for betweenness edge and Modularity - "+value.toUpperCase());
+		earse_chart ();
+		data = data_raw;
+		var data_num = data_raw.length;
+		maxStackY = 0;
+		var min_v = data_raw[0].id;
+		var max_v = data_raw[0].id;
+		var min_d = min_v;
+		var old_val = 0;
+		var list_data = [0];
+		data_raw.forEach(function(e,i){
+			maxStackY = (maxStackY > e.values[1].value[1] ? maxStackY : e.values[1].value[1]);
+			var dis = e.id-old_val;
+			min_d = min_d < dis ? min_d : dis;
+			min_v = min_v < e.id ? min_v : e.id;
+			max_v = max_v > e.id ? max_v : e.id;
+			old_val = e.id;
+			list_data.push(e.id);
+		});
+		var min_s = min_d*2/3;
+		xScale.domain([0, max_v+min_d/2]);
+		xAxis.call(d3.axisBottom(xScale)
+					.tickValues(list_data)
+					);
+		stackedBarWidth = containerWidth/((max_v-0+min_d/2)/min_s);
 
+		yScale.domain([0, maxStackY*(1+legendScale_per)]);
+		barScale.domain([0, maxStackY*(1+legendScale_per)]);
+
+
+		var new_layers = layersArea.selectAll(".layer").data(data_raw);
+
+		var newer = new_layers.enter().append("g")
+					.attr("class", function(d){return d.id;});
+
+    	var layerss = newer
+    			.selectAll("rect")
+    			.data(function (d) { d.values.forEach(function(e){e.value.push(d.id);});
+    				return d.values; })
+    			.enter().append("rect");
+
+		layerss
+					.attr("class",function(d){return d.key; })
+					.attr("x", function(d){return (xScale(d.value[2])-stackedBarWidth/2);})
+			        .attr("y", height-margin.bottom)
+			        .attr("width", stackedBarWidth)
+			        .attr("height", 0)
+			        .attr("fill",function(d){return colorLegend(d.key);})
+			        .call(transition_animation);
+		//layerss.exit().remove();
+  		yAxis.call(transition_axis);
+	});
+}
 function updateData(value) {
+	d3.select("#try_button").style("background-color","lightsteelblue" );
 	name_file=value;
-	title_text.text("Computing time for betweenness edge and Modularity - "+value.toUpperCase())
+	title_text.text("Computing time for betweenness edge and Modularity - "+value.toUpperCase());
 	var list_o = filelist.filter(function(n,i){
 		if (n.name==value){
 			return n;
@@ -148,7 +205,7 @@ function updateData(value) {
 	});
 	var min_v=d3.min(list_o[0].list);
 	var max_v=d3.max(list_o[0].list);
-	var min_d=list_o[0].list[0];
+	var min_d=min_v;
 	for (var tm=1;tm<list_o[0].list.length;tm++){
 		var dis = list_o[0].list[tm]-list_o[0].list[tm-1];
 		min_d = min_d < dis ? min_d : dis;
@@ -163,11 +220,15 @@ function updateData(value) {
 	stackedBarWidth = containerWidth/((max_v-0+min_d/2)/min_s);
 
 	var q=d3.queue();
+	
 	q.defer(earse_chart).defer(function(){data.splice(0);maxStackY=0;});
+
   	list_o[0].list.forEach(function(e){
   		q.defer(read_json,value,e,count);
   		count++;});
-  	q.awaitAll(function(error, results) {
+
+  	q.defer(function(){d3.select("#try_button").style("background-color","lemonchiffon");})
+  	.awaitAll(function(error, results) {
       if (error) throw error;
       console.log(results);
     });
