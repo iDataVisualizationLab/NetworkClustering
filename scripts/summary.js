@@ -1,4 +1,4 @@
-var margin = {top: 50, right: 50, bottom: 100, left: 100};
+var margin = {top: 50, right: 50, bottom: 80, left: 100};
 var width = (window.innerWidth
 || document.documentElement.clientWidth
 || document.body.clientWidth) - margin.left;
@@ -16,9 +16,9 @@ var    numSamples = 3;
 var    data = [];
 var chartMode="stacked",
 	name_file = filelist[0].name,
-	mtitle = {top: 10, right: margin.right, bottom: 10, left: margin.left},
+	mtitle = {top: 10, right: margin.right, bottom: 30, left: margin.left},
 	stitle = {width: (width-margin.right), height: (30+mtitle.top+mtitle.bottom)},
-	containerWidth = width-margin.right,
+	containerWidth = width-margin.left-margin.right,
 	containerHeight = height-margin.bottom-stitle.height,
 	//-----Legend -----------------
 	paddingBetweenLegendSeries = 5,
@@ -33,7 +33,7 @@ var chartMode="stacked",
     //legendX = containerWidth - legendSeriesBoxWidth - legendMargin,
     //legendY = legendMargin,
     legendX = legendMargin.x+margin.left,
-    legendY = legendMargin.y+margin.top,
+    legendY = legendMargin.y+stitle.height,
     legendSeriesMax = legendSeriesHeight*seriesNames.length,
     legendScale_per = legendSeriesMax/containerHeight,
     maxStackY = 0,
@@ -62,19 +62,20 @@ var mainArea = svg.append("g")
     .attr("class", "main-area")
     .attr("width",containerWidth)
     .attr("height",containerHeight)
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + stitle.height + ")");
 
 var xScale = d3.scaleLinear()
-    .range([0, width-margin.right]);
+    .range([0, containerWidth]);
 
 var yScale = d3.scaleLinear()
-    .range([height-margin.bottom, 0]);
+    .range([containerHeight, 0]);
+
 var barScale = d3.scaleLinear()
-    .range([0,height-margin.bottom]);
+    .range([0,containerHeight]);
 
 var xAxis = mainArea.append("g")
 	  .attr("class", "axis axis--x")
-	  .attr("transform", "translate(" + [0,height-margin.bottom] + ")");
+	  .attr("transform", "translate(" + [0,containerHeight] + ")");
 
 var yAxis = mainArea.append("g")
 	  .attr("class", "axis axis--x");
@@ -86,8 +87,8 @@ svg.append("text")
 
 svg.append("text")
 		.attr("class","graph-title")
-    	.attr("transform", "translate("+ [margin.left+containerWidth/2, margin.top+height-margin.bottom/2-10] +")")  // text is drawn off the screen top left, move down and out and rotate
-        .text("Computing Time - ms");
+    	.attr("transform", "translate("+ [margin.left+containerWidth/2, height-margin.bottom/2] +")")  // text is drawn off the screen top left, move down and out and rotate
+        .text("Number of samples");
 
 var legendSeries = svg.append("g")
     .attr("class", "legend")
@@ -161,7 +162,7 @@ function readData(value) {
 		xAxis.call(d3.axisBottom(xScale)
 					.tickValues(list_data)
 					);
-		stackedBarWidth = containerWidth/((max_v-0+min_d/2)/min_s);
+		stackedBarWidth = containerWidth/(max_v+min_d/2)*min_s;
 
 		yScale.domain([0, maxStackY*(1+legendScale_per)]);
 		barScale.domain([0, maxStackY*(1+legendScale_per)]);
@@ -181,7 +182,7 @@ function readData(value) {
 		layerss
 					.attr("class",function(d){return d.key; })
 					.attr("x", function(d){return (xScale(d.value[2])-stackedBarWidth/2);})
-			        .attr("y", height-margin.bottom)
+			        .attr("y", containerHeight)
 			        .attr("width", stackedBarWidth)
 			        .attr("height", 0)
 			        .attr("fill",function(d){return colorLegend(d.key);})
@@ -310,7 +311,7 @@ function read_json(value,e,count){
 		layerss
 					.attr("class",function(d){return d.key; })
 					.attr("x", function(d){return (xScale(e)-stackedBarWidth/2);})
-			        .attr("y", height-margin.bottom)
+			        .attr("y", containerHeight)
 			        .attr("width", stackedBarWidth)
 			        .attr("height", 0)
 			        .attr("fill",function(d){return colorLegend(d.key);})
