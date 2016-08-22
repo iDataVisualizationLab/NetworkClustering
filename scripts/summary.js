@@ -1,4 +1,4 @@
-var margin = {top: 50, right: 50, bottom: 100, left: 50};
+var margin = {top: 50, right: 50, bottom: 100, left: 100};
 var width = (window.innerWidth
 || document.documentElement.clientWidth
 || document.body.clientWidth) - margin.left;
@@ -14,27 +14,49 @@ var seriesNames = ["Betweenness edge", "Modularity Q"];
 var    numSeries = seriesNames.length;
 var    numSamples = 3;
 var    data = [];
-var changeChartMode="stacked",
+var chartMode="stacked",
+	name_file = filelist[0].name,
+	mtitle = {top: 10, right: margin.right, bottom: 10, left: margin.left},
+	stitle = {width: (width-margin.right), height: (30+mtitle.top+mtitle.bottom)},
 	containerWidth = width-margin.right,
-	containerHeight = height-margin.bottom,
+	containerHeight = height-margin.bottom-stitle.height,
+	//-----Legend -----------------
 	paddingBetweenLegendSeries = 5,
     legendSeriesBoxX = 0,
     legendSeriesBoxY = 0,
     legendSeriesBoxWidth = 15,
     legendSeriesBoxHeight = 15,
     legendSeriesHeight = legendSeriesBoxHeight + paddingBetweenLegendSeries,
-    legendSeriesLabelX = -5,
-    legendSeriesLabelY = legendSeriesBoxHeight / 2,
-    legendMargin = 20,
-    legendX = containerWidth - legendSeriesBoxWidth - legendMargin,
-    legendY = legendMargin
+    legendSeriesLabelX = legendSeriesBoxWidth+5,
+    legendSeriesLabelY = legendSeriesHeight  / 2,
+    legendMargin = {x:30,y:10},
+    //legendX = containerWidth - legendSeriesBoxWidth - legendMargin,
+    //legendY = legendMargin,
+    legendX = legendMargin.x+margin.left,
+    legendY = legendMargin.y+margin.top,
+    legendSeriesMax = legendSeriesHeight*seriesNames.length,
+    legendScale_per = legendSeriesMax/containerHeight,
     maxStackY = 0,
-    stackedBarWidth = 0;
+    stackedBarWidth = 0,
+    animation_time = 4000,
+    animation_time_per = 20;
 var colorLegend = d3.scaleOrdinal(d3.schemeCategory10);
+
 var svg =d3.select("#chart")
 	.attr("width",width)
 	.attr("height",height);
 
+var titleArea = svg.append("g")
+    .attr("class", "title")
+    .attr("width",stitle.width)
+    .attr("height",stitle.height)
+    .attr("transform", "translate(" + mtitle.left + "," + mtitle.top + ")");
+
+var title_text = titleArea
+				.append("text")
+				.attr("x",stitle.width/2)
+				.attr("y",stitle.height/2)
+				.text("Computing time for betweenness edge and Modularity - VIS");
 
 var mainArea = svg.append("g")
     .attr("class", "main-area")
@@ -57,6 +79,15 @@ var xAxis = mainArea.append("g")
 var yAxis = mainArea.append("g")
 	  .attr("class", "axis axis--x");
 
+svg.append("text")
+		.attr("class","graph-title")
+    	.attr("transform", "translate("+ [margin.left/2, margin.top+containerHeight/2] +")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+        .text("Computing Time - ms");
+
+svg.append("text")
+		.attr("class","graph-title")
+    	.attr("transform", "translate("+ [margin.left+containerWidth/2, margin.top+height-margin.bottom/2-10] +")")  // text is drawn off the screen top left, move down and out and rotate
+        .text("Computing Time - ms");
 
 var legendSeries = svg.append("g")
     .attr("class", "legend")
@@ -87,7 +118,8 @@ var layersArea = mainArea.append("g")
 
 var layers;
 
-d3.selectAll(".js-stacked-chart-container input").on("change", changeChartMode);
+d3.selectAll(".joint-toggle input").on("change", changeChartMode);
+d3.select("#save_button").attr("onclick", "save_file()");
 
 d3.queue().defer(updateData,"vis").awaitAll(function(error, results) {
       if (error) throw error;
@@ -103,8 +135,8 @@ var yAxis = d3.svg.axis()
     .orient("left");*/
 
 function updateData(value) {
-	data = [];
-	layersArea.selectAll("g").remove().transition();
+	name_file=value;
+	title_text.text("Computing time for betweenness edge and Modularity - "+value.toUpperCase())
 	var list_o = filelist.filter(function(n,i){
 		if (n.name==value){
 			return n;
@@ -116,7 +148,7 @@ function updateData(value) {
 	});
 	var min_v=d3.min(list_o[0].list);
 	var max_v=d3.max(list_o[0].list);
-	var min_d=max_v-min_v;
+	var min_d=list_o[0].list[0];
 	for (var tm=1;tm<list_o[0].list.length;tm++){
 		var dis = list_o[0].list[tm]-list_o[0].list[tm-1];
 		min_d = min_d < dis ? min_d : dis;
@@ -124,14 +156,21 @@ function updateData(value) {
 	var count =0;
 	var min_s = min_d*2/3;
 
-	xScale.domain([-min_s/2+min_v, max_v+min_s/2]);
-	xAxis.call(d3.axisBottom(xScale).tickValues(list_o[0].list));
-	stackedBarWidth = containerWidth/((max_v-min_v)/min_s+1);
+	xScale.domain([0, max_v+min_d/2]);
+	xAxis.call(d3.axisBottom(xScale)
+				.tickValues([0].concat(list_o[0].list))
+				);
+	stackedBarWidth = containerWidth/((max_v-0+min_d/2)/min_s);
 
 	var q=d3.queue();
+	q.defer(earse_chart).defer(function(){data.splice(0);maxStackY=0;});
   	list_o[0].list.forEach(function(e){
   		q.defer(read_json,value,e,count);
   		count++;});
+  	q.awaitAll(function(error, results) {
+      if (error) throw error;
+      console.log(results);
+    });
   	/*console.log(layersArea.selectAll("g").data());
   	layers = layersArea.selectAll("g");
   	layers.selectAll("rect").data(data,function (d) { console.log(d.values);return d.values; })
@@ -141,6 +180,24 @@ function updateData(value) {
 			        .attr("width", stackedBarWidth)
 			        .attr("height", function(d){return (yScale(d[1]));});*/
 }
+function earse_chart (){
+	var layer_All = layersArea.selectAll(".layer").data(data).enter();
+	var group_All = layer_All.selectAll("g");
+	layer_All.selectAll("rect")
+				.transition()
+				.duration(animation_time)
+				.delay(function(d,i){return i*animation_time_per})
+				.attr("y", height-margin.bottom)
+        		.attr("height", 0)
+				.call(function () {
+					console.log("I have been call");
+					console.log("1");
+					layer_All.remove();
+					console.log("2");
+					group_All.remove();
+				});
+}
+
 
 function read_json(value,e,count){
 	d3.json("data/"+value+e+".json", function(error, graph) {
@@ -161,14 +218,12 @@ function read_json(value,e,count){
 				{key: "Modularity Q", value:[(end_time_b-start_time),(end_time_t-start_time)]}]
 			};
 		maxStackY = (maxStackY > data_temp.values[1].value[1] ? maxStackY : data_temp.values[1].value[1]);
-		yScale.domain([0, maxStackY]);
-		barScale.domain([0, maxStackY]);
-		var t = d3.transition()
-      	.duration(750);
+
+		yScale.domain([0, maxStackY*(1+legendScale_per)]);
+		barScale.domain([0, maxStackY*(1+legendScale_per)]);
+
       	var old_layer = layersArea.selectAll(".layer").data(data).enter();
-      	old_layer.selectAll("rect").attr("y", function(d){return (yScale(d.value[1]));})
-			        .attr("height", function(d){return (barScale(d.value[1]-d.value[0]));})
-			        .transition(t);
+      	old_layer.selectAll("rect").call(transition_animation);
       	data.push(data_temp);
 
 					//new_layers.remove();	
@@ -194,34 +249,66 @@ function read_json(value,e,count){
 		layerss
 					.attr("class",function(d){return d.key; })
 					.attr("x", function(d){return (xScale(e)-stackedBarWidth/2);})
-			        .attr("y", function(d){return (yScale(d.value[1]));})
+			        .attr("y", height-margin.bottom)
 			        .attr("width", stackedBarWidth)
-			        .attr("height", function(d){return (barScale(d.value[1]-d.value[0]));})
-			        .attr("fill",function(d){return colorLegend(d.key);});
+			        .attr("height", 0)
+			        .attr("fill",function(d){return colorLegend(d.key);})
+			        .call(transition_animation);
 		//layerss.exit().remove();
 		layerss.merge(new_layers);
-  		yAxis.call(d3.axisLeft(yScale));
+  		yAxis.call(transition_axis);
 
 	});
 }
 
-function bar_graph(){
-	layersArea = mainArea.append("g")
-    .attr("class", "layers");
-	layers = layersArea.selectAll(".layer")
-	.data(data)
-    .enter().append("g")
-        .attr("class", function (d) { return "layer " + seriesClass(d.name); });
 
-	layers.selectAll("rect").data(function (d) { return d.values; })
-	    .enter().append("rect")
-	        .attr("x", stackedBarX)
-	        .attr("y", height)
-	        .attr("width", stackedBarWidth)
-	        .attr("height", 0)
-	        .call(transitionStackedBars)
-	    ;
+function transition_animation (selection){
+	selection.transition()
+        .duration(animation_time)
+        .delay(function (d,i) { return i * animation_time_per; })
+        .attr("y", function(d){return (yScale(d.value[1]));})
+        .attr("height", function(d){return (barScale(d.value[1]-d.value[0]));});
+}
 
+function transition_axis (selection){
+	selection.transition()
+        .duration(animation_time)
+        .delay(function (d,i) { return i * animation_time_per; })
+        .call(d3.axisLeft(yScale));
+}
+
+function changeChartMode() {
+	console.log(this.name);
+	if (this.name==="animate"){
+		if (this.value==="yes")
+		{
+			animation_time=4000;
+			animation_time_per=20;
+		}else{
+			animation_time=0;
+			animation_time_per=0;
+		}
+	}else{
+	    chartMode = this.value;
+	    if (chartMode === "stacked") {
+	        //stackBars();
+	    }
+	    else {
+	        //groupBars();
+	    }
+	}
+}
+
+function save_file() {
+	console.log(data);
+	try {
+    var isFileSaverSupported = !!new Blob;
+    var json_S = JSON.stringify(data);
+    var file = new Blob([json_S],{type: "application/json"});
+	saveAs(file,name_file+"_time.json");
+	} catch (e) {
+		console.log("file save error: "+e);
+	}
 }
 
 function findnei(a,key,av){
