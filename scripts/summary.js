@@ -136,6 +136,7 @@ var yAxis = d3.svg.axis()
     .scale(yScale)
     .orient("left");*/
 function readData(value) {
+	name_file = value;
 	d3.json("data/"+value.toUpperCase()+"_time.json", function(error, data_raw) {
 		if (error) throw error;
 		title_text.text("Computing time for betweenness edge and Modularity - "+value.toUpperCase());
