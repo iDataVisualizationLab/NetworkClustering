@@ -97,8 +97,12 @@ var node;
 var roots;
 var tree_deep_cv;
 var radius = 6;
+/*
+<<<<<<< HEAD
 
-d3.json("data/imdb125.json", function(error, graph) {
+=======
+>>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
+d3.json("data/windsufers.json", function(error, graph) {
 if (error) throw error;
 var num_n = graph.nodes.length;
 var start_time = performance.now();
@@ -142,6 +146,7 @@ var end_time_t = performance.now();
 	      .enter().append("g")
 	      .attr("class", " node--leaf")
 	      .attr("transform", function(d) { return "translate(" + [tree_deep(d.data.depth), d.x] + ")"; });
+	      console.log(roots.leaves().length);
 	node2.append("circle")
 	      .attr("r", resize*4)
 	      .attr("fill", function(d) { return color(1) });
@@ -284,7 +289,6 @@ var end_time_t = performance.now();
     .text(function(d) { return d.name!=null?d.name:d.id; });
   
   simulation.force("charge", d3.forceManyBody().strength(function(){return -wgroup/graph.nodes.length}));
-  
   simulation
       .nodes(graph.nodes)
       .on("tick", ticked);
@@ -375,7 +379,8 @@ var end_time_t = performance.now();
 		    .attr("y1",0)
 		    .attr("x2",-x_range(x0))
 		    .attr("y2",0);
-	  //d.x2 = d.x1;   
+	  //d.x2 = d.x1;
+	  clusterbox.select("text").text("# of clusters : "+(x0+1)+" | Q : "+Math.round((tree_hi[1][tree_hi[1].length-x0])*1000)/1000);   
 	}
 
 	function dragended_bar(d) {
@@ -518,7 +523,7 @@ function a_array(ee){
   ee.links.forEach(function(e){
   	var ii=0;
   	var jj=0;
-  	ee.nodes.filter(function(n,i){
+  	ee.nodes.forEach(function(n,i){
 	  if (e.source==n.id)
 	    ii=i;
 	  else
@@ -561,17 +566,17 @@ function calculate_m(ee){
   ee.links.forEach(function(e){
   	var ii=0;
   	var jj=0;
-  	ee.nodes.filter(function(n,i){
+  	/*ee.nodes.filter(function(n,i){
 	  if (e.source==n.id)
 	    ii=i;
 	  else
 	  	if (e.target==n.id)
 	  		jj=i;
-	});
+	});*/
 	sum = sum+e.value;
     
 	});
-  return [sum];
+  return sum;
 }
 
 function a_array_ext(arr,av){
@@ -609,9 +614,9 @@ function finditem(grouping,li,graph){
   var g2=-1;
   for (var i=0;(i<grouping.length)&&(g1==-1||g2==-1);i++){
     for (var j=0;(j<grouping[i].length)&&(g1==-1||g2==-1);j++){ 
-      if (g1==-1&&grouping[i][j]==graph.nodes[li[0]].id)
+      if (g1==-1&&grouping[i][j]==li[0])
           g1=i;
-      if (g2==-1&&grouping[i][j]==graph.nodes[li[1]].id)
+      if (g2==-1&&grouping[i][j]==li[1])
           g2=i;
     }
   }
@@ -857,12 +862,12 @@ function tree_mapingv3(step,graph){
   var Q = [];
   var Q_t = Q_init(A,m,a_e);
   Q.push(Q_t);
-  grouping.push([graph.nodes[ed[0]].id,graph.nodes[ed[1]].id]);
+  grouping.push(ed);
   // join 2 nodes together
   Q_t +=  delta_Q(ed[0],ed[1],m,A,a_e);
   //----
   Q.push(Q_t);
-  var hi=[{name: [ed[0],ed[1]],children: [{name: graph.nodes[ed[0]].name!=null?graph.nodes[ed[0]].name:graph.nodes[ed[0]].id, depth: 0},{name: graph.nodes[ed[1]].name!=null?graph.nodes[ed[1]].name:graph.nodes[ed[1]].id, depth: 0}], depth: lv, Q: Q_t}];
+  var hi=[{name: ed,children: [{name: graph.nodes[ed[0]].name!=null?graph.nodes[ed[0]].name:graph.nodes[ed[0]].id, depth: 0},{name: graph.nodes[ed[1]].name!=null?graph.nodes[ed[1]].name:graph.nodes[ed[1]].id, depth: 0}], depth: lv, Q: Q_t}];
   while (step.length!=0){
     var li=step.pop();
     // 4 main case
@@ -930,6 +935,7 @@ function tree_mapingv3(step,graph){
 	    hi[0].children.push(hi[1]);
     	hi.splice(1,1);
 	}
+
 	Q.push(Q_t);
     return [hi[0],Q];
   }
