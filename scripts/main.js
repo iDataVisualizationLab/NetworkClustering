@@ -102,7 +102,8 @@ var radius = 6;
 
 =======
 >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
-d3.json("data/windsufers.json", function(error, graph) {
+//d3.json("data/karate.json", function(error, graph) {
+	d3.json("data/football.json", function(error, graph) {
 if (error) throw error;
 var num_n = graph.nodes.length;
 var start_time = performance.now();
@@ -146,7 +147,7 @@ var end_time_t = performance.now();
 	      .enter().append("g")
 	      .attr("class", " node--leaf")
 	      .attr("transform", function(d) { return "translate(" + [tree_deep(d.data.depth), d.x] + ")"; });
-	      console.log(roots.leaves().length);
+	      //console.log(roots.leaves().length);
 	node2.append("circle")
 	      .attr("r", resize*4)
 	      .attr("fill", function(d) { return color(1) });
@@ -588,19 +589,23 @@ function a_array_ext(arr,av){
 			var nei = arr[iii][jjj].nei;
 			if (n>1)
 			{
-				arr[iii][jjj].nei = arr.length;
-				arr[iii][jjj].val = av; 
-				arr.push([{nei: iii, val: av},{nei: nei,val: av}]);
+				arr[iii][jjj] = {nei: arr.length, val: av, ori:nei};
+				//arr[iii][jjj].nei = arr.length;
+				//arr[iii][jjj].val = av;
+
+				arr.push([{nei: iii, val: av,ori:nei},{nei: nei,val: av,ori:iii}]);
 				for (var z = 2; z<n;z++)
 				{
 					var ll = arr.length;
-					arr[ll-1][1].nei = ll;
-					arr.push([{nei: ll-1, val: av},{nei: nei,val: av}]);
+					//arr[ll-1][1].nei = ll;
+					arr[ll-1][1] = {nei: ll, var: av, ori:iii};
+					arr.push([{nei: ll-1, val: av},{nei: nei,val: av, ori:nei}]);
 				}
 				arr[nei].filter(function(n,i){
 					if (n.nei==iii){
-						n.val = av; 
-						n.nei = arr.length-1;//last virtual node
+						arr[nei].splice(i,1,{nei: arr.length-1, val: av, ori:iii});
+						//n.val = av; 
+						//n.nei = arr.length-1;//last virtual node
 					}
 				});
 			}
@@ -649,16 +654,17 @@ function between_e(graph){
   var alink_o = a_array_av(graph); // orgiginal
   var av = alink_o[1];
   alink_o = alink_o[0];
+  var alink_fix = a_array_ext(alink_o,av)[0]; // add virtual nodes
   var num_n = graph.nodes.length;// num of node
   var step=[];
   var num_l = graph.links.length;
   //document.write("</br> av: "+av);
   while (step.length!=graph.links.length){
-  	var alink_oc = copyA(alink_o);
+  	//var alink_oc = copyA(alink_o);
   	//document.write("</br> old array size: "+alink_o[3][0].nei);
-  	var alink_fix = a_array_ext(alink_oc,av); // add virtual nodes
+  	//var alink_fix = a_array_ext(alink_oc,av); // add virtual nodes
   	//document.write("</br> old array size: "+alink_o[3][0].nei);
-  	var alink = alink_fix[0]; //fixed
+  	//var alink = alink_fix[0]; //fixed
     // calculate
     var ebs=init(num_n,num_n);
     var max_ebs=[0,0,0];
@@ -675,10 +681,10 @@ function between_e(graph){
       Q.push(s);
       while (Q.length!=0){
         var i = Q.shift();
-        S.push(i);
+        if (i<num_n) S.push(i);
         var l=Q.length;
         //document.write("</br>"+i+": ");
-        alink[i].forEach(function(e){
+        alink_fix[i].forEach(function(e,indd){
         	var j = e.nei;
 			if (d[j]==null){
 				d[j]=d[i]+1;
@@ -696,10 +702,10 @@ function between_e(graph){
 				  }else{
 				  	Pathu[j]=Pathu[i];
 				  	if (j<num_n){
-					  	if (Pathd[Pathu[i][Pathu[i].length-1]]==null)
-							Pathd[Pathu[i][Pathu[i].length-1]]=[j];
+					  	if (Pathd[alink_fix[i][indd].ori]==null)
+							Pathd[alink_fix[i][indd].ori]=[j];
 						else
-							Pathd[Pathu[i][Pathu[i].length-1]].push(j);
+							Pathd[alink_fix[i][indd].ori].push(j);
 						
 					}
 				  }
@@ -709,13 +715,19 @@ function between_e(graph){
 				  w[j]=w[j]+w[i];
 				  if (i<num_n){//not virtual node
 				  	Pathu[j].push(i);
-				  }else{
-				  	Pathu[j].concat(Pathu[i]);
 				  	if (j<num_n){
-					  	if (Pathd[Pathu[i][Pathu[i].length-1]]==null)
-							Pathd[Pathu[i][Pathu[i].length-1]]=[j];
+					  	if (Pathd[i]==null)
+							Pathd[i]=[j];
 						else
-							Pathd[Pathu[i][Pathu[i].length-1]].concat(Pathd[j]);
+							Pathd[i].push(j);
+					}//if j is virtual , j won't be visit second time
+				  }else{
+				  	if (j<num_n){
+				  		Pathu[j].concat(Pathu[i]);
+					  	if (Pathd[alink_fix[i][indd].ori]==null)
+							Pathd[alink_fix[i][indd].ori]=[j];
+						else
+							Pathd[alink_fix[i][indd].ori].concat(Pathd[j]);
 						
 					}
 				  }
@@ -736,28 +748,40 @@ function between_e(graph){
   		Pathd[i].forEach(function(e){document.write("- "+e);});
   	};*/
       var eb=init(num_n,num_n);
+      var gene =[];
       //Leaf
-      while(Leaf.length!=0){
+      /*while(Leaf.length!=0){
         var t=Leaf.pop();
+        console.log("list Leaf: "+t);
+        //S.filter(function(e,inde){if (e==t){ S.splice(inde,1); return;}});
         //document.write("</br>"+" -Leaf "+t);
         while (Pathu[t].length!=0){
           var i = Pathu[t].pop();
-          eb[i][t] = w[i]/w[t];
-          //eb[t][i] = w[i]/w[t];
+          eb[i][t] += w[i]/w[t];
+          eb[t][i] += w[i]/w[t];
           ebs[i][t] += w[i]/w[t];
-          //ebs[t][i] += w[i]/w[t];
+          ebs[t][i] += w[i]/w[t];
+          //console.log(ebs[i][t]);
           if (ebs[i][t]>max_ebs[0]){
             max_ebs[0]=ebs[i][t];
             max_ebs[1]=i;
             max_ebs[2]=t;
           }
+	      	if (ebs[t][i]>max_ebs[0]){
+	            max_ebs[0]=ebs[t][i];
+	            max_ebs[1]=t;
+	            max_ebs[2]=i;
+	      	}
+       
         }
-      }
+      }*/
       //document.write("</br>"+" ----- ");
       //document.write("</br>"+S);
       //cont
+      S.splice(0,1);
       while (S.length!=0){
         var j = S.pop();
+        //console.log(d[j]);
         if (j<num_n){
 	        if (Pathd[j]!=null)
 	        {
@@ -772,45 +796,66 @@ function between_e(graph){
 	            while (Pathu[j].length!=0){
 	              var i = Pathu[j].pop();
 	              eb[i][j]=w[i]/w[j]*sumb;
-	              //eb[j][i]=w[i]/w[j]*sumb;
+	              //eb[j][i]+=w[i]/w[j]*sumb;
 	              ebs[i][j]+=w[i]/w[j]*sumb;
 	              //ebs[j][i]+=w[i]/w[j]*sumb;
+	              //console.log("3-9: "+ebs[3][9]+" 0-9: "+ebs[0][9]);
+	              //console.log(ebs[i][t]);
 	              if (ebs[i][j]>max_ebs[0]){
 	                max_ebs[0]=ebs[i][j];
 	                max_ebs[1]=i;
 	                max_ebs[2]=j;
+	                //console.log("i: "+max_ebs[1]+" j: "+max_ebs[2]+" max "+max_ebs[0]);
 	                //document.write("</br>"+"max "+ max_ebs);
 	              }
+
 	            }
 	          }
 	      	}
+	      	else{
+	      		while (Pathu[j].length!=0){
+	      		var i = Pathu[j].pop();
+		          eb[i][j] = w[i]/w[j];
+		          //eb[j][i] += w[i]/w[j];
+		          ebs[i][j] += w[i]/w[j];
+		         // ebs[j][i] += w[i]/w[j];
+		          if (ebs[i][j]>max_ebs[0]){
+		            max_ebs[0]=ebs[i][j];
+		            max_ebs[1]=i;
+		            max_ebs[2]=j;
+		            //console.log("i: "+max_ebs[1]+" j: "+max_ebs[2]+" max "+max_ebs[0]);
+		          }
+			 
+			      }
+	      	}
         }
       }
+      //console.log("----end---- "+s);
     }
     if (max_ebs[0]!=0){
       step.push([max_ebs[1],max_ebs[2]]);
-      av = av*num_l;
+      //av = av*num_l;
       //document.write("</br>"+"max "+ max_ebs[0]);
-      for (var i =0;i<alink_o[max_ebs[1]].length;i++){
+      for (var i =0;i<alink_fix[max_ebs[1]].length;i++){
       	 //document.write("</br>"+"-- "+ alink_o[max_ebs[1]][i].nei);
-      	if (alink_o[max_ebs[1]][i].nei== max_ebs[2]){
-      		av = av - alink_o[max_ebs[1]][i].val;
-			num_l--;
-			av = av/num_l;
-			alink_o[max_ebs[1]].splice(i,1);
+      	if (alink_fix[max_ebs[1]][i].nei== max_ebs[2]||alink_fix[max_ebs[1]][i].ori== max_ebs[2]){
+      		//av = av - alink_o[max_ebs[1]][i].val;
+			//num_l--;
+			//av = av/num_l;
+			alink_fix[max_ebs[1]].splice(i,1);
 			break;
       	}
       }
 
-      for (var i =0;i<alink_o[max_ebs[2]].length;i++){
+      for (var i =0;i<alink_fix[max_ebs[2]].length;i++){
       	 //document.write("</br>"+"--- "+ alink_o[max_ebs[2]][i].nei);
-      	if (alink_o[max_ebs[2]][i].nei== max_ebs[1]){
-			alink_o[max_ebs[2]].splice(i,1);
+      	if (alink_fix[max_ebs[2]][i].nei== max_ebs[1]||alink_fix[max_ebs[2]][i].ori== max_ebs[1]){
+			alink_fix[max_ebs[2]].splice(i,1);
 			break;
       	}
       }
     }
-    //document.write("----step: "+ step+"  av"+av+"</br>");
+    //console.log("----step: "+ step+"  av"+av+"</br>");
   }
   return step;
 }
@@ -837,15 +882,15 @@ function delta_Q(i,j,m,A,a_e){
   	A[j][j] = 0;
   	A[j][i] = 0;
   	A[i][j] = 0;
-  	var sum = A[i][i];
+  	var sum = 0;
 	for  (var k = 0;k<n;k++){
 		if (k!=i && k!=j){
-			A[i][k] += A[j][k];
+			A[i][k] = A[i][k]+A[j][k];
 			A[k][i] = A [i][k];
 			A[j][k] = 0;
 			A[k][j] = 0;
-			sum += A[i][k]; 
 		}
+		sum += A[i][k]; 
 	}
 	a_e[i] = sum/2/m;
 	a_e[j] = 0;
