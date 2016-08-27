@@ -103,7 +103,7 @@ var radius = 6;
 =======
 >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
 //d3.json("data/karate.json", function(error, graph) {
-	d3.json("data/football.json", function(error, graph) {
+	d3.json("data/vis100.json", function(error, graph) {
 if (error) throw error;
 var num_n = graph.nodes.length;
 var start_time = performance.now();
@@ -289,7 +289,7 @@ var end_time_t = performance.now();
     .attr("dy", ".35em")
     .text(function(d) { return d.name!=null?d.name:d.id; });
   
-  simulation.force("charge", d3.forceManyBody().strength(function(){return -wgroup/graph.nodes.length}));
+  simulation.force("charge", d3.forceManyBody().strength(function(){return -(wgroup*3)/graph.nodes.length}));
   simulation
       .nodes(graph.nodes)
       .on("tick", ticked);
