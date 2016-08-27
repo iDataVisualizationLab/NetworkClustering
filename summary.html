@@ -5,13 +5,16 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 .axis {
-  font: 10px sans-serif;
+  font: 13px sans-serif;
 }
 .axis path,
 .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
+}
+.axis.axis--x text{
+  font: 13px sans-serif;
 }
 .axis.axis--x line,
 .axis.axis--x path {
@@ -130,6 +133,7 @@ body {
 .stacked-chart .grid-lines {
     fill: none;
     stroke: lightgrey;
+    stroke-dasharray: 5,2;
 }
 
 .stacked-chart .layer rect {
@@ -312,4 +316,5 @@ function abc(){
 <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="scripts/math_script.js"></script>
 <script src="scripts/summary.js"></script>
