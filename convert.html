@@ -1,0 +1,183 @@
+<input type="file" name="file" id="file">
+<input type="file" name="file" id="filetsv">
+<input type="file" name="file" id="filetsvspace">
+<script src="https://cdn.rawgit.com/eligrey/FileSaver.js/master/FileSaver.min.js"></script>
+<script type="text/javascript">
+document.getElementById('file').onchange = function(){
+  var data={"nodes":[],"links":[]};
+  var file = this.files[0];
+  var start =0;
+  var reader = new FileReader();
+  var name_file = file.name.split(".")[0];
+  console.log(file.name);
+  reader.onload = function(progressEvent){
+    // Entire file
+    //console.log(this.result);
+
+    // By lines
+    var lines = this.result.split('\n');
+    var line = 0;
+    var id=0;
+    while ( line < lines.length){
+      if (lines[line].trim()=="node"||lines[line].trim()=="nodes"){
+        var new_node = new Object();
+        line+=2;
+        while (lines[line].trim()!="]"){
+          var line_fix = lines[line].trim().split(' ');
+          if (line_fix[1][0]=="\""){
+            line_fix[1]=line_fix[1].slice(1,-1);
+          }
+          console.log(line_fix[1]);
+          new_node[line_fix[0]]=line_fix[1];
+          line++;
+        }
+        if  (new_node.group == null)
+          new_node["group"] = 0;
+        data.nodes.push(new_node);
+      }else{
+        if (lines[line].trim()=="link"||lines[line].trim()=="edge"||lines[line].trim()=="links"){
+          var new_node = new Object();
+          line+=2;
+          while (lines[line].trim()!="]"){
+            var line_fix = lines[line].trim().split(' ');
+            new_node[line_fix[0]]=line_fix[1];
+            line++;
+          }
+          if  (new_node.value == null)
+            new_node["value"] = 1;
+          data.links.push(new_node);
+        }
+        else{
+          line++;
+        }
+      }
+    }
+    try {
+    //var name_file = 
+    var isFileSaverSupported = !!new Blob;
+    var json_S = JSON.stringify(data);
+    var file = new Blob([json_S],{type: "application/json"});
+  saveAs(file,name_file+".json");
+  } catch (e) {
+    console.log("file save error: "+e);
+  }
+  };
+  reader.readAsText(file);
+
+};
+
+document.getElementById('filetsv').onchange = function(){
+  var data={"nodes":[
+            ],"links":[
+            ]};
+  var file = this.files[0];
+  var start =0;
+  var reader = new FileReader();
+  var name_file = file.name.split(".")[0];
+  console.log(file.name);
+  reader.onload = function(progressEvent){
+    // Entire file
+    //console.log(this.result);
+
+    // By lines
+    var lines = this.result.split('\n');
+    var line = 0;
+    var id=0;
+    var min_v=Infinity;
+    var max_v=0;
+    var data_raw=[];
+    while ( line < lines.length){
+      if (lines[line].trim().split(" ")[0]!="%"&&lines[line].trim().split("\t").length>=2){
+        data_raw.push(lines[line].trim().split("\t"));
+        var member = lines[line].trim().split("\t");
+        for (var j=0;j<2;j++)
+        {
+          var e= member[j];
+            if (min_v > parseInt(e))
+              min_v = parseInt(e);
+            else{
+              if (max_v < parseInt(e)) 
+                max_v=parseInt(e);}
+          
+        }
+      }
+      line++;
+    }
+    for (var i=0; i<=max_v-min_v;i++){
+      data.nodes.push({"id":i,"group":0});
+    }
+    data_raw.forEach(function(e){
+      data.links.push({"source":(parseInt(e[0])-min_v),"target":(parseInt(e[1])-min_v),"value":(e.length==3?parseInt(e[2]):1)});
+    });
+
+    try {
+    //var name_file = 
+    var isFileSaverSupported = !!new Blob;
+    var json_S = JSON.stringify(data);
+    var file = new Blob([json_S],{type: "application/json"});
+  saveAs(file,name_file+".json");
+  } catch (e) {
+    console.log("file save error: "+e);
+  }
+  };
+  reader.readAsText(file);
+
+};
+document.getElementById('filetsvspace').onchange = function(){
+  var data={"nodes":[
+            ],"links":[
+            ]};
+  var file = this.files[0];
+  var start =0;
+  var reader = new FileReader();
+  var name_file = file.name.split(".")[0];
+  console.log(file.name);
+  reader.onload = function(progressEvent){
+    // Entire file
+    //console.log(this.result);
+
+    // By lines
+    var lines = this.result.split('\n');
+    var line = 0;
+    var id=0;
+    var min_v=Infinity;
+    var max_v=0;
+    var data_raw=[];
+    while ( line < lines.length){
+      if (lines[line].trim().split(" ")[0]!="%"&&lines[line].trim().split(" ").length>=2){
+        data_raw.push(lines[line].trim().split(" "));
+        var member = lines[line].trim().split(" ");
+        for (var j=0;j<2;j++)
+        {
+          var e= member[j];
+            if (min_v > parseInt(e))
+              min_v = parseInt(e);
+            else{
+              if (max_v < parseInt(e)) 
+                max_v=parseInt(e);}
+          
+        }
+      }
+      line++;
+    }
+    for (var i=0; i<=max_v-min_v;i++){
+      data.nodes.push({"id":i,"group":0});
+    }
+    data_raw.forEach(function(e){
+      data.links.push({"source":(parseInt(e[0])-min_v),"target":(parseInt(e[1])-min_v),"value":(e.length==3?parseInt(e[2]):1)});
+    });
+
+    try {
+    //var name_file = 
+    var isFileSaverSupported = !!new Blob;
+    var json_S = JSON.stringify(data);
+    var file = new Blob([json_S],{type: "application/json"});
+  saveAs(file,name_file+".json");
+  } catch (e) {
+    console.log("file save error: "+e);
+  }
+  };
+  reader.readAsText(file);
+
+};
+</script>
