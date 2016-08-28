@@ -226,6 +226,7 @@ function between_e(graph){
         if (i<num_n) S.push(i);
         var l=Q.length;
         //document.write("</br>"+i+": ");
+        //console.log(" to: "+i);
         alink_fix[i].forEach(function(e,indd){
         	var j = e.nei;
 			if (d[j]==null){
@@ -241,6 +242,7 @@ function between_e(graph){
 						else
 							Pathd[i].push(j);
 					}
+					//console.log(i+" Pathd "+ Pathd[i]);
 				  }else{
 				  	Pathu[j]=Pathu[i];
 				  	if (j<num_n){
@@ -250,7 +252,9 @@ function between_e(graph){
 							Pathd[alink_fix[i][indd].ori].push(j);
 						
 					}
+					//console.log(alink_fix[i][indd].ori+" Pathd "+ Pathd[alink_fix[i][indd].ori]);
 				  }
+				  //console.log(j+" Pathu "+ Pathu[j]);
 
 			}else{
 				if (d[j]==d[i]+1){
@@ -273,6 +277,8 @@ function between_e(graph){
 						
 					}
 				  }
+				  //console.log(i+" Pathd "+ Pathd[i]);
+				  //console.log(j+" Pathu "+ Pathu[j]);
 				}
 	        }//document.write("</br>"+" - "+e.nei+": "+"d :"+d[e.nei]+"w :"+w[e.nei]);
 	    });
@@ -323,8 +329,7 @@ function between_e(graph){
       S.splice(0,1);
       while (S.length!=0){
         var j = S.pop();
-        //console.log(d[j]);
-        if (j<num_n){
+        console.log(j+" -- "+d[j]);
 	        if (Pathd[j]!=null)
 	        {
 	        	//document.write("</br> -- "+j);
@@ -350,6 +355,17 @@ function between_e(graph){
 	                //console.log("i: "+max_ebs[1]+" j: "+max_ebs[2]+" max "+max_ebs[0]);
 	                //document.write("</br>"+"max "+ max_ebs);
 	              }
+	              else{
+	              	if (ebs[i][j]==max_ebs[0]){
+	              		if (Math.abs(d[i]-d[j])<Math.abs(d[max_ebs[1]]-d[max_ebs[2]])){
+			                max_ebs[0]=ebs[i][j];
+			                max_ebs[1]=i;
+			                max_ebs[2]=j;
+			                //console.log("i: "+max_ebs[1]+" j: "+max_ebs[2]+" max "+max_ebs[0]);
+			                //document.write("</br>"+"max "+ max_ebs);
+			            }
+		              }
+	              }
 
 	            }
 	          }
@@ -370,9 +386,8 @@ function between_e(graph){
 			 
 			      }
 	      	}
-        }
       }
-      //console.log("----end---- "+s);
+      console.log("----end---- "+s);
     }
     if (max_ebs[0]!=0){
       step.push([max_ebs[1],max_ebs[2]]);
@@ -397,7 +412,7 @@ function between_e(graph){
       	}
       }
     }
-    //console.log("----step: "+ step+"  av"+av+"</br>");
+    console.log("----step: "+ step+"  av"+av+"</br>");
   }
   return step;
 }
@@ -438,7 +453,8 @@ function delta_Q(i,j,m,A,a_e){
 	a_e[j] = 0;
 	return delta_Q;
 }
-
+function takeaname(d){
+return d.label!=null? d.label:(d.name!=null?d.name:d.id);}
 function tree_mapingv3(step,graph){
   var grouping = [];	
   var ed = step.pop();
@@ -454,7 +470,7 @@ function tree_mapingv3(step,graph){
   Q_t +=  delta_Q(ed[0],ed[1],m,A,a_e);
   //----
   Q.push(Q_t);
-  var hi=[{name: ed,children: [{name: graph.nodes[ed[0]].name!=null?graph.nodes[ed[0]].name:graph.nodes[ed[0]].id, depth: 0},{name: graph.nodes[ed[1]].name!=null?graph.nodes[ed[1]].name:graph.nodes[ed[1]].id, depth: 0}], depth: lv, Q: Q_t}];
+  var hi=[{name: ed,children: [{name: takeaname(graph.nodes[ed[0]]), depth: 0},{name: takeaname(graph.nodes[ed[1]]), depth: 0}], depth: lv, Q: Q_t}];
   while (step.length!=0){
     var li=step.pop();
     // 4 main case
@@ -493,7 +509,7 @@ function tree_mapingv3(step,graph){
 	    //move
 	    grouping[g1].push(li[0]);
 	    hi[g1]={name: li,children: [hi[g1]], depth: lv, Q:Q_t};
-	    hi[g1].children.push({name: graph.nodes[li_t[0]].name!=null?graph.nodes[li_t[0]].name:graph.nodes[li_t[0]].id , depth: 0});
+	    hi[g1].children.push({name: takeaname(graph.nodes[li_t[0]]) , depth: 0});
 	    //document.write("case 2 "+JSON.stringify(hi)+"</br>");
 	  }
 	}else{
@@ -505,7 +521,7 @@ function tree_mapingv3(step,graph){
 	    Q.push(Q_t);
 	    //move
 	    grouping.push(li);
-	    hi.push({name: li,children: [{name: graph.nodes[li[0]].name!=null?graph.nodes[li[0]].name:graph.nodes[li[0]].id, depth: 0},{name: graph.nodes[li[1]].name!=null?graph.nodes[li[1]].name:graph.nodes[li[1]].id, depth: 0}], depth: lv, Q: Q_t});
+	    hi.push({name: li,children: [{name: takeaname(graph.nodes[li[0]]), depth: 0},{name: takeaname(graph.nodes[li[1]]), depth: 0}], depth: lv, Q: Q_t});
 	    //document.write("case 3 "+JSON.stringify(hi)+"</br>");
 	  }
 	}
