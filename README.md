@@ -32,6 +32,13 @@ The following image shows the collaboration network between Jazz musicians.  Eac
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/Jazz musician.png)
 
+### American College Football
+The following image shows the network of American football games
+between Division IA colleges during regular season Fall 2000, as compiled
+by M. Girvan and M. Newman. Dataset: [UCI Network Data Repository](https://networkdata.ics.uci.edu/data.php?id=5).
+
+![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/football.png)
+
 ### References
 
 http://journals.aps.org/pre/abstract/10.1103/PhysRevE.69.066133
