@@ -329,7 +329,7 @@ function between_e(graph){
       S.splice(0,1);
       while (S.length!=0){
         var j = S.pop();
-        console.log(j+" -- "+d[j]);
+        //console.log(j+" -- "+d[j]);
 	        if (Pathd[j]!=null)
 	        {
 	        	//document.write("</br> -- "+j);
@@ -346,7 +346,7 @@ function between_e(graph){
 	              //eb[j][i]+=w[i]/w[j]*sumb;
 	              ebs[i][j]+=w[i]/w[j]*sumb;
 	              //ebs[j][i]+=w[i]/w[j]*sumb;
-	              //console.log("3-9: "+ebs[3][9]+" 0-9: "+ebs[0][9]);
+	              //console.log("2-10: "+ebs[2][10]+" 10-12: "+ebs[10][12]+"10-9: "+ebs[9][10]);
 	              //console.log(ebs[i][t]);
 	              if (ebs[i][j]>max_ebs[0]){
 	                max_ebs[0]=ebs[i][j];
@@ -382,12 +382,22 @@ function between_e(graph){
 		            max_ebs[1]=i;
 		            max_ebs[2]=j;
 		            //console.log("i: "+max_ebs[1]+" j: "+max_ebs[2]+" max "+max_ebs[0]);
-		          }
+		          } else{
+	              	if (ebs[i][j]==max_ebs[0]){
+	              		if (Math.abs(d[i]-d[j])<Math.abs(d[max_ebs[1]]-d[max_ebs[2]])){
+			                max_ebs[0]=ebs[i][j];
+			                max_ebs[1]=i;
+			                max_ebs[2]=j;
+			                //console.log("i: "+max_ebs[1]+" j: "+max_ebs[2]+" max "+max_ebs[0]);
+			                //document.write("</br>"+"max "+ max_ebs);
+			            }
+		              }
+	              }
 			 
 			      }
 	      	}
       }
-      console.log("----end---- "+s);
+      //console.log("----end---- "+s);
     }
     if (max_ebs[0]!=0){
       step.push([max_ebs[1],max_ebs[2]]);
