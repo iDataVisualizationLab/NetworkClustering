@@ -20,7 +20,7 @@ The following image shows ommunity structure for 125 proteins selected from vari
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/IndexCards.png)
 
-### Evidence in Biological Pathway Literature
+### Author Collaboration in Visualization Publication
 The following image shows collaboration network of the top 100 researcher from [Visualization Publication Data Collection](http://www.vispubdata.org/site/vispubdata/). 
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/vis_100.png)
