@@ -22,7 +22,7 @@ The following image shows collaboration network of the top 100 researchers from 
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/vis_100.png)
 
-### Jazz Musicians network
+### Zachary's Karate Club
 The following image shows contains the network of friendships between the 34 members of a karate club at a US university, as described by Wayne Zachary in 1977. Dataset at [UCI Network Data Repository](https://networkdata.ics.uci.edu/data.php?id=105).
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/karate.png)
@@ -30,7 +30,7 @@ The following image shows contains the network of friendships between the 34 mem
 ### Jazz Musicians network
 The following image shows the collaboration network between Jazz musicians.  Each node is a Jazz musician and an edge denotes that two musicians have played together in a band from [Koblenz Network Collection](http://konect.uni-koblenz.de/networks/arenas-jazz).
 
-![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/jazz musician.png)
+![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/Jazz musician.png)
 
 ### References
 
