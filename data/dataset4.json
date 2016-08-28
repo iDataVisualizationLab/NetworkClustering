@@ -41,7 +41,6 @@
     {"source": "9", "target": "12", "value": 7},
     {"source": "9", "target": "14", "value": 7},
     {"source": "10", "target": "12", "value": 9},
-    {"source": "10", "target": "10", "value": 1},
     {"source": "12", "target": "13", "value": 4},
     {"source": "12", "target": "14", "value": 3},
     {"source": "13", "target": "14", "value": 2}
