@@ -103,7 +103,7 @@ var radius = 6;
 =======
 >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
 //d3.json("data/karate.json", function(error, graph) {
-	d3.json("data/vis100.json", function(error, graph) {
+	d3.json("data/dataset4.json", function(error, graph) {
 if (error) throw error;
 var num_n = graph.nodes.length;
 var start_time = performance.now();
