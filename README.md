@@ -12,12 +12,12 @@ The following image shows community structure for the top 100 actors from [IMDB 
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/imdb_125.png)
 
-### Evidence in Biological Pathway Literature
+### Protein interactions in Biological Pathway Literature
 The following image shows community structure for 125 proteins selected from various Pathway Commons index cards. In particular, a link connects two proteins/complexes if they interact. Nodes are colored by community formation. 
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/IndexCards.png)
 
-### Author Collaboration in Visualization Publication
+### Author Collaboration in Visualization Publications
 The following image shows collaboration network of the top 100 researchers from [Visualization Publication Data Collection](http://www.vispubdata.org/site/vispubdata/). Links connect authors of the same paper. Link thickness highlights the number of papers that they published together.
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/vis_100.png)
