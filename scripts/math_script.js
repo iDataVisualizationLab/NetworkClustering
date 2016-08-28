@@ -422,7 +422,7 @@ function between_e(graph){
       	}
       }
     }
-    console.log("----step: "+ step+"  av"+av+"</br>");
+    //console.log("----step: "+ step+"  av"+av+"</br>");
   }
   return step;
 }
