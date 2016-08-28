@@ -22,7 +22,7 @@ The following image shows collaboration network of the top 100 researchers from 
 
 ![ScreenShot](https://github.com/iDataVisualizationLab/NetworkClustering/blob/master/figures/vis_100.png)
 
-# References
+### References
 
 http://journals.aps.org/pre/abstract/10.1103/PhysRevE.69.066133
 
