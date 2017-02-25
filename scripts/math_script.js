@@ -195,7 +195,7 @@ function between_e(graph) {
     var step = [];
     var num_l = graph.links.length;
     //document.write("</br> av: "+av);
-    while (step.length != num_l) {
+    while (step.length != graph.links.length) {
         //var alink_oc = copyA(alink_o);
         //document.write("</br> old array size: "+alink_o[3][0].nei);
         //var alink_fix = a_array_ext(alink_oc,av); // add virtual nodes
@@ -393,8 +393,8 @@ function between_e(graph) {
             //console.log("----end---- "+s);
         }
         var end_time_b = performance.now();
-        console.log("Time for old technique");
-        console.log(end_time_b-start_time);
+        //console.log("Time for old technique");
+        //console.log(end_time_b-start_time);
         if (max_ebs[0] != 0) {
             step.push([max_ebs[1], max_ebs[2]]);
             //av = av*num_l;
@@ -621,7 +621,8 @@ function edge_betweenness_centrality(graph, k='none', normalized=true, weight) {
     else {
         nodes = graph_nodes_random(num_node, num_node);
     }
-    while (step.length != 1) {
+    var start_time = performance.now();
+    while (step.length != graph.links.length) {
         for (i = 0; i < num_node; i++) {
             betweenness[i] = 0.0
         }
@@ -646,8 +647,7 @@ function edge_betweenness_centrality(graph, k='none', normalized=true, weight) {
                 betweenness = _accumulate_edges(betweenness, S, P, sigma, nodes[s]);
             }
         }
-        var end_time_b = performance.now();
-        console.log(end_time_b-start_time);
+
         for (n = 0; n < num_node; n++) {
             delete betweenness[n];
         }
@@ -676,7 +676,9 @@ function edge_betweenness_centrality(graph, k='none', normalized=true, weight) {
             }
         }
     }
-
+    var end_time_b = performance.now();
+    console.log("Time to run betweenness brandes");
+     console.log(end_time_b-start_time);
     return step;
 }
 function _single_source_dijkstra_path_basic(G, s, weight='weight') {
@@ -809,37 +811,64 @@ function _betweennness_virtual(graph) {
     var alink_o = a_array_av(graph); // orgiginal
     var av = alink_o[1];
     alink_o = alink_o[0];
+    var totaldegree=0;
+    for(i=0;i<alink_o.length;i++){
+        totaldegree+=alink_o[i].length;
+    }
     var VirtualAdj = a_array_ext(alink_o, av)[0];
+    console.log("Total virtual nodes:"+ VirtualAdj.length)
     var betweenness = new Object();
     var nodes = [];
     var num_node = graph.nodes.length;
-    graph.nodes.forEach(function (d) {
-        nodes.push(+d.id);
+        var templink = graph.links.filter(function (d) {
+            if(d.value>1) return d;
+        })
+    console.log(templink)
+    var random_node = Math.floor(Math.random() * graph.nodes.length)
+    var pred  =prececessorV_length(VirtualAdj,random_node, graph.nodes.length);
+    var arrayvalue = Object.values(pred).sort(function (a, b) {
+        return b - a;
     });
-    if (k !== 'none') {
-        nodes = graph_nodes_random(num_node, k)
+    var VDG = arrayvalue[0] + arrayvalue[1];
+
+    var sigma = 0.1, delta = 0.1, c = 0.5;
+    var d = Math.floor(Math.log2(VDG) - 2) + 1 + Math.log(1 / delta);
+    var r = c / Math.pow(sigma, 2) * d;
+
+    for(var i=0;i<graph.nodes.length;i++){
+        nodes.push(i);
     }
+
+    console.log("2-approx Diameter")
+    console.log(VDG)
+    console.log("Number of real nodes: "+ graph.nodes.length);
+    console.log("Number of virtual nodes: "+ VirtualAdj.length);
+    console.log("Number of iteration on sampling: "+ r)
     graph.links.forEach(function (d) {
         betweenness[d.source + ',' + d.target] = 0;
     });
   //  var start_time = performance.now();
+  //   while (step.length != graph.links.length) {
+    var start_time = performance.now();
     while (step.length != graph.links.length) {
-        var start_time = performance.now();
-        nodes.forEach(function (s) {
+
+       for(i=0;i<nodes.length;i++){
+           // var s = Math.floor(Math.random() * nodes.length)
+           var s= i;
             var SPSigma = _single_source_shortest_path_basic_virtual_nodes(VirtualAdj, s, nodes);
             var S = SPSigma[0];
             var P = SPSigma[1];
             var sigma = SPSigma[2];
             betweenness = _accumulate_edges(betweenness, S, P, sigma, s);
-        });
+        };
         var end_time_b = performance.now();
+
         nodes.forEach(function (s) {
             delete  betweenness[s];
         });
         var result = _.first(_.max(_.pairs(betweenness), _.last)).split(',');
         step.push(result.map(Number));
         for (var i = 0; i < VirtualAdj[result[0]].length; i++) {
-            //document.write("</br>"+"-- "+ alink_o[max_ebs[1]][i].nei);
             if (VirtualAdj[result[0]][i].nei == result[1] || VirtualAdj[result[0]][i].ori == result[1]) {
                 VirtualAdj[result[0]].splice(i, 1);
                 break;
@@ -853,7 +882,8 @@ function _betweennness_virtual(graph) {
         }
         delete betweenness[_.first(_.max(_.pairs(betweenness), _.last))];
     }
-
+    console.log("Time to run betweenness VS");
+    console.log(end_time_b-start_time);
     return step;
 
 }
@@ -869,7 +899,7 @@ function _single_source_shortest_path_basic_virtual_nodes(G, s, nodes) {
     var Q = [];
     Q.push(s);
     while (Q.length > 0) {
-        v = Q.shift();
+       var v = Q.shift();
         S.push(v);
         for (w = 0; w < G[v].length; w++) {
             //G[v].forEach(function (w) {

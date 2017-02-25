@@ -1,1 +1,78 @@
-[{"id":30,"values":[{"key":"Betweenness edge","value":[0,46.64999999999998]},{"key":"Modularity Q","value":[46.64999999999998,51.53499999999997]}]},{"id":51,"values":[{"key":"Betweenness edge","value":[0,127.625]},{"key":"Modularity Q","value":[127.625,136.31]}]},{"id":100,"values":[{"key":"Betweenness edge","value":[0,1980.605]},{"key":"Modularity Q","value":[1980.605,2031.8449999999998]}]}]
+[
+  {
+    "id": 200,
+    "values": [
+      {
+        "key": "Betweenness edge",
+        "value": [
+          0,
+          14
+        ]
+      },
+      {
+        "key": "Modularity Q",
+        "value": [
+          14,
+          14.015
+        ]
+      }
+    ]
+  },
+  {
+    "id": 500,
+    "values": [
+      {
+        "key": "Betweenness edge",
+        "value": [
+          0,
+          15
+        ]
+      },
+      {
+        "key": "Modularity Q",
+        "value": [
+          15,
+          15.092
+        ]
+      }
+    ]
+  },
+  {
+    "id": 970,
+    "values": [
+      {
+        "key": "Betweenness edge",
+        "value": [
+          0,
+          120
+        ]
+      },
+      {
+        "key": "Modularity Q",
+        "value": [
+          120,
+          120.789
+        ]
+      }
+    ]
+  },
+  {
+    "id": 1500,
+    "values": [
+      {
+        "key": "Betweenness edge",
+        "value": [
+          0,
+          120
+        ]
+      },
+      {
+        "key": "Modularity Q",
+        "value": [
+          120,
+          120.789
+        ]
+      }
+    ]
+  }
+]

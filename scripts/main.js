@@ -133,24 +133,37 @@ var radius = 6;
  =======
  >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
 // d3.json("data/karate.json", function(error, graph) {
-d3.json("data/imdb171.json", function (error, graph) {
+d3.json("data/indexCards250.json", function (error, graph) {
     // d3.json("data/dataset4_fix.json", function(error, graph) {
     if (error) throw error;
     // for(var i=0;i<graph.links.length;i++){
     //     console.log("G.add_edge("+graph.links[i].source+","+ graph.links[i].target+", weight="+ graph.links[i].value+")")
     // }
 
+    // graph.links = graph.links.filter(function (d) {
+    //     if(d.value>1) return d;
+    // })
+    console.log("number of filtered links:" + graph.links.length)
+    var AV_W  = d3.mean(graph.links, function (d) {
+        return d.value;
+    })
+    console.log("Average weight: "+ AV_W);
+    var AV_DG = 2*graph.links.length/graph.nodes.length;
+    console.log("Average node degree: "+ AV_DG);
+    console.log("Threshold: "+ (Math.log(graph.nodes.length)/AV_DG ) + 1);
+
     var num_n = graph.nodes.length;
-    var sample_properties = 0.7;
+    var sample_properties = 1;
     var alpha = Math.floor(num_n * sample_properties);
     var start_time = performance.now();
 //processing
-//     var step = edge_betweenness_centrality(graph, k = alpha, normalized = true, weight = true, virtual = false);
-    var step = _betweennness_virtual(graph,k=10);
+   var step = edge_betweenness_centrality(graph, k = num_n, normalized = true, weight = true, virtual = false);
+    // var step = _betweennness_virtual(graph);
     // var step = between_e(graph);
     var end_time_b = performance.now();
     var max_lv = step.length + 1;
 // tree
+    var start_time_t = performance.now();
     var tree_hi = tree_mapingv3(step, graph);
     var end_time_t = performance.now();
     var tree_deep = d3.scaleLinear().domain([tree_hi[0].depth, 0]).range([0, wtree]);
@@ -230,7 +243,7 @@ d3.json("data/imdb171.json", function (error, graph) {
     time_box
         .append("text")
         .attr("transform", "translate(" + [10, 35] + ")")
-        .text("Computing time for Modularity Q: " + Math.round(end_time_t - end_time_b + start_time) + " ms");
+        .text("Computing time for Modularity Q: " + Math.round(end_time_t -  start_time_t) + " ms");
     //-------------graph
     var domain = {x: {min: 0, max: 0}, y: {min: 0, max: 0}};
     domain.y.min = d3.min(tree_hi[1]);
@@ -337,7 +350,7 @@ d3.json("data/imdb171.json", function (error, graph) {
             return d.id;
         })
         .enter().append("circle")
-        .attr("r", 5)
+        .attr("r", 7)
         .attr("fill", function (d) {
             return color(d.group);
         })
@@ -366,7 +379,7 @@ d3.json("data/imdb171.json", function (error, graph) {
         .force("y", d3.forceY().strength(.0005));
 
     simulation.force("link")
-        .links(graph.links);
+        .links(graph.links).distance(100);
 
     function ticked() {
         node
@@ -550,9 +563,9 @@ d3.json("data/imdb171.json", function (error, graph) {
         })
         simulation.force("cluster", clustering);
         simulation.alphaTarget(0.2).restart();
-        link.attr("opacity", function (d, i) {
-            return newlinks.indexOf(i) > -1 ? 0.1 : 1;
-        })
+        // link.attr("opacity", function (d, i) {
+        //     return newlinks.indexOf(i) > -1 ? 0.1 : 1;
+        // })
 
 
         function clustering(alpha) {

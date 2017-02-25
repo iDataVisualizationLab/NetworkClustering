@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="scripts/math_script.js"></script>
+<script src="scripts/underscore-min.js"></script>
+<script src="scripts/iDVLlibrary.js"></script>
+<body>
+<script>
+
+        d3.json("data/lesmis.json", function(error, graph) {
+        if (error) throw error;
+        var num_n = graph.nodes.length;
+        var start_time = performance.now();
+     var step = edge_betweenness_centrality(graph, k = num_n, normalized = true, weight = true, virtual = false);
+//        var step = _betweennness_virtual(graph);
+        var end_time_b = performance.now();
+        var start_time_t = performance.now();
+        var tree_hi = tree_mapingv3(step, graph);
+        var end_time_t = performance.now();
+        console.log("Time to compute betweenness:");
+        console.log(end_time_b-start_time);
+        console.log("Time to compute Modularity: ")
+        console.log(end_time_t-start_time_t);
+        console.log("Best Q value: ");
+        console.log(tree_hi[0].Q)
+            console.log("Number of clusters ");
+            console.log(tree_hi[0].children.length)
+    });
+</script>
+
+</body>
+</html>

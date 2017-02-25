@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>D3 v4 - Group barChart</title>
+    <style>
+        #graph {
+            width: 900px;
+            height: 500px;
+        }
+        .tick line {
+            stroke-dasharray: 2 2 ;
+            stroke: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+<div id="graph"></div>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.min.js"></script>
+<script>
+    //!(function(){
+    //    "use strict"
+
+    var width,height
+    var chartWidth, chartHeight
+    var margin
+    var svg = d3.select("#graph").append("svg")
+    var axisLayer = svg.append("g").classed("axisLayer", true)
+    var chartLayer = svg.append("g").classed("chartLayer", true)
+
+
+    var xScale = d3.scaleBand()
+
+
+
+    var xInScale = d3.scaleBand();
+
+    var yScale = d3.scaleLog().base(2)
+
+    var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+
+    d3.csv("data/data.csv", cast,  main)
+
+    function cast(d) {
+        Object.keys(d).forEach(function(key){
+            if (!isNaN(+d[key])) d[key] = +d[key]
+        })
+        return d
+    }
+
+    function main(data) {
+        console.log(data)
+
+
+        var nested = d3.nest()
+            .rollup(function(d){ delete d[0].data; return d[0] })
+            .key(function(d){ return d.data })
+            .entries(data)
+
+        nested.forEach(function(d){
+            d.age = Object.keys(d.value).map(function(key){
+                return {key:key, value:d.value[key]}
+            })
+        })
+
+        setSize(nested)
+        drawAxis()
+        drawChart(nested)
+    }
+
+    function setSize(nested) {
+        width = document.querySelector("#graph").clientWidth
+        height = document.querySelector("#graph").clientHeight
+
+        margin = {top:0, left:100, bottom:40, right:0 }
+
+
+        chartWidth = width - (margin.left+margin.right)
+        chartHeight = height - (margin.top+margin.bottom)
+
+        svg.attr("width", width).attr("height", height)
+
+        axisLayer.attr("width", width).attr("height", height)
+
+        chartLayer
+            .attr("width", chartWidth)
+            .attr("height", chartHeight)
+            .attr("transform", "translate("+[margin.left, margin.top]+")")
+
+
+
+        xScale.domain(nested.map(function(d) { return d.key }))
+            .range([0, chartWidth]).paddingInner(0.1)
+
+
+        var ageNames = Object.keys(nested[0].value)
+
+        xInScale.domain(ageNames).range([0, xScale.bandwidth()])
+
+        var yMax = d3.max(nested.map(function(d){
+            var values = Object.keys(d.value).map(function(key){
+                return d.value[key]
+            })
+            return d3.max(values)
+        }))
+
+        yScale.domain([0.001, yMax]).range([chartHeight, 0])
+
+
+    }
+
+    function drawChart(nested) {
+        var t = d3.transition()
+            .duration(1000)
+            .ease(d3.easeLinear)
+
+
+        var data = chartLayer.selectAll(".data")
+            .data(nested)
+
+        var newCountry = data.enter().append("g").attr("class", "data")
+
+
+        data.merge(newCountry)
+            .attr("transform", function(d) { return "translate(" + [xScale(d.key), 0] + ")"; });
+
+
+        var bar = newCountry.selectAll(".bar")
+            .data(function(d){ return d.age })
+
+        var newBar = bar.enter().append("rect").attr("class", "bar")
+
+
+        bar.merge(newBar)
+            .attr("width", xInScale.bandwidth())
+            .attr("height", 0)
+            .attr("fill", function(d) { return color(d.key); })
+            .attr("transform", function(d) { return "translate(" + [xInScale(d.key), chartHeight] + ")" })
+
+
+
+        //アニメーション
+        bar.merge(newBar).transition(t)
+            .attr("height", function(d) { return chartHeight - yScale(d.value); })
+            .attr("transform", function(d) { return "translate(" + [xInScale(d.key), yScale(d.value)] + ")" })
+
+
+    }
+
+    function drawAxis(){
+        var yAxis = d3.axisLeft(yScale)
+            .tickSizeInner(-chartWidth)
+
+        axisLayer.append("g")
+            .attr("transform", "translate("+[margin.left, margin.top]+")")
+            .attr("class", "axis y")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -30)
+            .attr("x", -150)
+            .attr("dy", ".71em")
+            .style("text-anchor", "right")
+            .style("stroke","black")
+            .text("Calculation time (second)");
+
+        var xAxis = d3.axisBottom(xScale)
+
+        axisLayer.append("g")
+            .attr("class", "axis x")
+            .attr("transform", "translate("+[margin.left, chartHeight]+")")
+            .call(xAxis).append("text")
+           .attr("x", 430)
+            .attr("y", 30)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .style("stroke","black")
+            .text("Network");
+
+
+    }
+
+    //}());
+</script>
+</body>
+</html>
