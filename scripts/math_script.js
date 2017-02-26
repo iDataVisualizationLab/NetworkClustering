@@ -852,9 +852,9 @@ function _betweennness_virtual(graph) {
     var start_time = performance.now();
     while (step.length != graph.links.length) {
 
-       for(i=0;i<nodes.length;i++){
-           // var s = Math.floor(Math.random() * nodes.length)
-           var s= i;
+       for(i=0;i<r;i++){
+           var s = Math.floor(Math.random() * nodes.length)
+           // var s= i;
             var SPSigma = _single_source_shortest_path_basic_virtual_nodes(VirtualAdj, s, nodes);
             var S = SPSigma[0];
             var P = SPSigma[1];

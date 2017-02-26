@@ -133,7 +133,7 @@ var radius = 6;
  =======
  >>>>>>> f41cb8646193b11f7aab076bf481cc71363c0550*/
 // d3.json("data/karate.json", function(error, graph) {
-d3.json("data/indexCards250.json", function (error, graph) {
+d3.json("data/indexCards500.json", function (error, graph) {
     // d3.json("data/dataset4_fix.json", function(error, graph) {
     if (error) throw error;
     // for(var i=0;i<graph.links.length;i++){
@@ -157,8 +157,8 @@ d3.json("data/indexCards250.json", function (error, graph) {
     var alpha = Math.floor(num_n * sample_properties);
     var start_time = performance.now();
 //processing
-   var step = edge_betweenness_centrality(graph, k = num_n, normalized = true, weight = true, virtual = false);
-    // var step = _betweennness_virtual(graph);
+//    var step = edge_betweenness_centrality(graph, k = num_n, normalized = true, weight = true, virtual = false);
+    var step = _betweennness_virtual(graph);
     // var step = between_e(graph);
     var end_time_b = performance.now();
     var max_lv = step.length + 1;
@@ -375,11 +375,12 @@ d3.json("data/indexCards250.json", function (error, graph) {
         .nodes(graph.nodes)
         .on("tick", ticked)
         .velocityDecay(0.2)
+        .force("center", d3.forceCenter(wgroup / 2, hgroup / 2))
         .force("x", d3.forceX().strength(.0005))
         .force("y", d3.forceY().strength(.0005));
 
     simulation.force("link")
-        .links(graph.links).distance(100);
+        .links(graph.links).distance(5);
 
     function ticked() {
         node

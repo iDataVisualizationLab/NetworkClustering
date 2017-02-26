@@ -11,9 +11,14 @@ var chart = c3.generate({
         ],
         type: 'bar'
     },
+    axis: {
+        y: {
+            max: 140
 
+        }
+    },
     size: {
-        width: 500
+        width: 700
 
     },
     bar: {

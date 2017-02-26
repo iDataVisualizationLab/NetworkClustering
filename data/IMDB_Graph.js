@@ -10,7 +10,7 @@ var chart = c3.generate({
     },
 
     size: {
-        width: 500
+        width: 700
 
     },
     bar: {
